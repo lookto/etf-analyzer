@@ -1,0 +1,17 @@
+{
+  "name": "etf-analyzer",
+  "version": "1.0.0",
+  "description": "a small tool to analyze your (future) etf portfolio regarding diversity ",
+  "main": "src/app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "etf",
+    "analyzer",
+    "portfolio",
+    "diversity"
+  ],
+  "author": "Lukas Tüllmann",
+  "license": "MIT"
+}
