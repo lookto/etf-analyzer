@@ -13,5 +13,10 @@
     "diversity"
   ],
   "author": "Lukas Tüllmann",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "mysql": "^2.18.1",
+    "nodejs-file-downloader": "^4.9.2",
+    "xlsx": "^0.17.4"
+  }
 }
