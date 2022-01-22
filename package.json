@@ -15,8 +15,12 @@
   "author": "Lukas Tüllmann",
   "license": "MIT",
   "dependencies": {
-    "mysql": "^2.18.1",
+    "fs": "^0.0.1-security",
+    "mysql2": "^2.3.3",
     "nodejs-file-downloader": "^4.9.2",
+    "path": "^0.12.7",
+    "sequelize": "^6.13.0",
+    "sequelize-cli": "^6.4.1",
     "xlsx": "^0.17.4"
   }
 }
