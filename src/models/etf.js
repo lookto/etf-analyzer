@@ -21,6 +21,14 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: false,
             unique: true
         },
+        etfproviderid: {
+            type: DataTypes.INTEGER,
+            allowNull: false,
+            references: {
+                key: 'id',
+                model: 'etfprovider'
+              }
+        }
         
     },
     {

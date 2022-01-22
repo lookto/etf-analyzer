@@ -55,13 +55,5 @@ const parseSpreadsheet = async(filepath) => {
     console.log(filedata[0].A);
     console.log(filedata.length);
 }
-//     parseFile: async function(file) {
-
-//         console.log(file);
-//         
-//     }
-
-// }
-
 
 module.exports = dataCrawler;
