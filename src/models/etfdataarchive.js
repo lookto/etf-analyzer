@@ -17,13 +17,9 @@ module.exports = (sequelize, DataTypes) => {
         isin: {
             type: DataTypes.STRING(12),
             allowNull: false,
-            unique: true
-        },
-        stocksectorid: {
-            type: DataTypes.INTEGER,
         },
         weight: {
-            type: DataTypes.DECIMAL,
+            type: DataTypes.DECIMAL(16,15),
             allowNull: false
         }
     },

@@ -1,6 +1,6 @@
 module.exports = (sequelize, DataTypes) => {
     const spreadsheetconfig = sequelize.define("spreadsheetconfig", {
-        etproviderid: {
+        etfproviderid: {
             type: DataTypes.INTEGER,
             allowNull: false,
             unique: true,
@@ -21,7 +21,7 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: false,
         },
         weightcolumn: {
-            type: DataTypes.DECIMAL,
+            type: DataTypes.INTEGER,
             allowNull: false,
         }
     },

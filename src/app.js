@@ -2,14 +2,14 @@ const db = require("./models");
 const dataCrawler = require("./services/datacrawler");
 
 
-db.sequelize.sync().then((req) => {
+await db.sequelize.sync({ alter:true }).then((req) => {
 
 });
 
 
 const  main = async() => {
-
-    dataCrawler.crawlData(db['etf']);
+    await db.sequelize.sync({alter:true});
+    dataCrawler.crawlData();
 }
 
 main();
