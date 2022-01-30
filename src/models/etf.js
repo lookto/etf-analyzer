@@ -1,16 +1,10 @@
+const etfindex = require("./etfindex");
+
 module.exports = (sequelize, DataTypes) => {
     const etf = sequelize.define("etf", {
         name: {
             type: DataTypes.STRING,
             unique: true,
-        },
-        etfindexid: {
-            type: DataTypes.INTEGER,
-            allowNull: false,
-            references: {
-                key: 'id',
-                model: 'etfindex'
-              }
         },
         urldatasheet: {
             type: DataTypes.STRING,
@@ -34,6 +28,10 @@ module.exports = (sequelize, DataTypes) => {
     {
         freezeTableName: true
     });
+
+    etf.associate = function(models) {
+        etf.belongsTo(models.etfindex, {foreignKey: 'etfindexid', as: 'etfindex'})
+      };
 
     return etf;
     

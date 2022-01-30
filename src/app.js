@@ -1,9 +1,8 @@
 const db = require("./models");
 const dataCrawler = require("./services/datacrawler");
 
-db.sequelize.sync().then((req) => {});
-
 const main = async () => {
+    await db.sequelize.sync();
     dataCrawler.crawlData();
 };
 
