@@ -15,7 +15,9 @@
   "author": "Lukas Tüllmann",
   "license": "MIT",
   "dependencies": {
+    "axios": "^0.25.0",
     "fs": "^0.0.1-security",
+    "limiter": "^2.1.0",
     "lodash": "^4.17.21",
     "mysql2": "^2.3.3",
     "nodejs-file-downloader": "^4.9.2",
