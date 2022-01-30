@@ -7,12 +7,10 @@ module.exports = (sequelize, DataTypes) => {
             autoIncrement: true
         },
         name: {
-            type: DataTypes.STRING,
-            allowNull: false
+            type: DataTypes.STRING
         },
         isin: {
             type: DataTypes.STRING(12),
-            allowNull: false,
             unique: true
         },
         stocksectorid: {
@@ -21,6 +19,9 @@ module.exports = (sequelize, DataTypes) => {
                 key: 'id',
                 model: 'stocksector'
               }
+        },
+        country: {
+            type: DataTypes.STRING(2)
         }
     },
     {
