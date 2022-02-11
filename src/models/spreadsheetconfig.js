@@ -7,6 +7,9 @@ module.exports = (sequelize, DataTypes) => {
         isincolumn: {
             type: DataTypes.INTEGER,
         },
+        symbolcolumn: {
+            type: DataTypes.INTEGER,
+        },
         namecolumn: {
             type: DataTypes.INTEGER,
             allowNull: false,
@@ -14,6 +17,13 @@ module.exports = (sequelize, DataTypes) => {
         weightcolumn: {
             type: DataTypes.INTEGER,
             allowNull: false,
+        },
+        sectorcolumn: {
+            type: DataTypes.INTEGER,
+        },
+        recalculateweight: {
+            type: DataTypes.BOOLEAN,
+            allowNull: false
         }
         
     },

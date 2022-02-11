@@ -1,20 +1,16 @@
 const db = require("../models");
-const { RateLimiter } = require("limiter");
-const axios = require("axios");
 const sectorManager = require("./stocksectormanager");
+const countryManager = require("./countrymanager");
+const yahooFinance = require("yahoo-finance2").default;
+const { RateLimiter } = require("limiter");
 
-const limiter = new RateLimiter({ tokensPerInterval: 1, interval: 1100 });
+const yahooLimiter = new RateLimiter({ tokensPerInterval: 1, interval: 2000 });
 
 const stockManager = {
     isISIN: async function (data) {
         try {
-            const country = await db["country"].findOne({
-                where: {
-                    isocode: data.substr(0, 2),
-                },
-                attributes: ["isocode"],
-            });
-            if (country !== null) {
+            const country = await countryManager.getRecByIso(data.substr(0, 2));
+            if (country) {
                 return true;
             }
             return false;
@@ -22,66 +18,113 @@ const stockManager = {
             return err;
         }
     },
-    isExisting: async function (isin) {
+    isExisting: async function (isin, symbol) {
+        let stock;
+        //Refactor nötig, um Code zu minimieren
         try {
-            const stock = await db["stock"].findOne({
-                where: {
-                    isin,
-                },
-            });
-            if (stock !== null) {
-                return true;
-            } else {
-                return false;
-            }
-        } catch (err) {
-            return err;
-        }
-    },
-    checkAndCreate: async function (isin) {
-        try {
-            if (!(await this.isExisting(isin))) {
-                db["stock"]
-                    .create({
+            if (isin) {
+                stock = await db["stock"].findOne({
+                    where: {
                         isin,
-                    })
-                    .then((res) => {
-                        this.updateStock(res.id);
-                    });
+                    },
+                });
+                if (stock) {
+                    return stock.id;
+                }
             }
+
+            if (symbol) {
+                stock = await db["stock"].findOne({
+                    where: {
+                        symbol,
+                    },
+                });
+                if (stock) {
+                    return stock.id;
+                }
+            }
+            return false;
         } catch (err) {
             return err;
         }
     },
-    updateStock: async function (id) {
-        let rec = await db["stock"].findOne({
-            where: {
-                id,
-            },
-        });
-        const remainingRequests = await limiter.removeTokens(1);
-        axios({
-            method: "get",
-            url: `https://finnhub.io/api/v1/stock/profile2?isin=${rec.isin}&token=c7a3vaiad3ia366f4oe0`,
-            responseType: "json",
-        }).then(async(res) => {
-            if (res.data.name !== undefined) {
-                console.log(res.data.name, res.data.country);
-                const sectorId = await sectorManager.checkAndCreate(res.data.finnhubIndustry)
+    checkAndCreate: async function (etf, stockData) {
+        if ((await this.isISIN(stockData.isin)) || stockData.symbol) {
+            try {
+                const stockid = await this.isExisting(
+                    stockData.isin,
+                    stockData.symbol
+                );
+                if (!stockid) {
+                    const stocksectorId = await sectorManager.getId(
+                        stockData.sector,
+                        etf.etfproviderId
+                    );
+                    const stock = await db["stock"].create({
+                        name: stockData.name,
+                        isin: stockData.isin,
+                        symbol: stockData.symbol,
+                        stocksectorId,
+                    });
+                    this.updateStock(stock);
+                    return stock.id;
+                }
+                return stockid;
+            } catch (err) {
+                console.log(err);
+                return null;
+            }
+        }
+    },
+    updateStock: async function (stock) {
+        let queryname;
+        let name;
+        let symbol;
+        let countryId;
+        try {
+            if (stock.isin) {
+                await yahooLimiter.removeTokens(1);
+                
+                console.log("Searching for ISIN ", stock.isin)
+                const query = await yahooFinance.search(stock.isin, {
+                    newsCount: 0,
+                });
+
+                countryId = await countryManager.getIdByIso(
+                    stock.isin.substr(0, 2)
+                );
+
+                symbol = stock.symbol || query.quotes[0]?.symbol || null;
+                queryname = query.quotes[0]?.shortname || null;
+            } else if (stock.symbol) {
+                await yahooLimiter.removeTokens(1);
+                console.log("Searching for SYMBOL ", stock.symbol)
+                const query = await yahooFinance.query(stock.symbol, {
+                    fields: ["region", "shortName"],
+                });
+                countryId = await countryManager.getIdByIso(query?.region);
+                queryname = query?.shortName;
+            }
+
+            name = queryname || stock.name;
+
+            if (symbol) {
                 db["stock"].update(
                     {
-                        name: res.data.name,
-                        country: res.data.country,
-                        stocksectorid: sectorId
+                        name,
+                        symbol,
+                        countryId,
                     },
                     {
                         where: {
-                            id,
+                            id: stock.id,
                         },
                     }
                 );
             }
-        });
+        } catch (err) {
+            return err;
+        }
     },
 };
 

@@ -15,8 +15,7 @@ module.exports = (sequelize, DataTypes) => {
 
     stocksector.associate = function (models) {
         stocksector.hasMany(models.stock);
-        freezeTableName: true
-    });
+        stocksector.hasMany(models.etfprovidersectorconfig);
     };
 
     return stocksector;

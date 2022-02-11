@@ -7,6 +7,10 @@ module.exports = (sequelize, DataTypes) => {
             },
             isin: {
                 type: DataTypes.STRING(12),
+                unique: true,
+            },
+            symbol: {
+                type: DataTypes.STRING(20),
                 unique: true
             }
         },

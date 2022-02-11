@@ -8,162 +8,180 @@ const stockManager = require("./stockmanager");
 const stock = require("../models/stock");
 
 const dataCrawler = {
-  crawlData: async function () {
-    const etfs = await db["etf"].findAll();
-    for (etf of etfs) {
-      await crawlSpreadsheet(etf);
-      //await crawlWebsite(etf);
-    }
-  },
+    crawlData: async function () {
+        const etfs = await db["etf"].findAll();
+        for (etf of etfs) {
+            await crawlSpreadsheet(etf);
+            //await crawlWebsite(etf);
+        }
+    },
 };
 
 const crawlSpreadsheet = async (etf) => {
-  try {
-    const dir = path.join(__dirname, "../temp/");
-    const filename = await dlSpreadsheet(etf, dir);
-    const filepath = path.join(dir, filename);
-    await parseSpreadsheet(etf, filepath);
-    deleteSpreadsheet(filepath);
-  } catch (error) {
-    return error;
-  }
+    try {
+        const dir = path.join(__dirname, "../temp/");
+        const filename = await dlSpreadsheet(etf, dir);
+        const filepath = path.join(dir, filename);
+        await parseSpreadsheet(etf, filepath);
+        deleteSpreadsheet(filepath);
+    } catch (error) {
+        return error;
+    }
 };
 
 const dlSpreadsheet = async (etf, dir) => {
-  var newfilename;
+    var newfilename;
 
-  //create Download
-  const dl = new Downloader({
-    url: etf.urldatasheet,
-    directory: dir,
-    onBeforeSave: (deducedName) => {
-      newfilename = `${etf.isin}${path.extname(deducedName)}`;
-      return newfilename;
-    },
-  });
+    //create Download
+    const dl = new Downloader({
+        url: etf.urlDatasheet,
+        directory: dir,
+        onBeforeSave: (deducedName) => {
+            newfilename = `${etf.isin}${path.extname(deducedName)}`;
+            return newfilename;
+        },
+    });
 
-  try {
-    //download Spreadsheet
-    await dl.download();
-    return newfilename;
-  } catch (error) {
-    console.log("Download failed", error);
-    return error;
-  }
+    try {
+        //download Spreadsheet
+        await dl.download();
+        return newfilename;
+    } catch (error) {
+        console.log("Download failed", error);
+        return error;
+    }
 };
 
 const parseSpreadsheet = async (etf, filepath) => {
-  //load and prepare Spreadsheet
-  const wb = xlsx.readFile(filepath, { raw: true });
-  const ws = wb.Sheets[wb.SheetNames[0]];
-  const filedata = xlsx.utils.sheet_to_json(ws, {
-    header: 1,
-    blankrows: false,
-  });
+    //load and prepare Spreadsheet
+    const wb = xlsx.readFile(filepath, { raw: true });
+    const ws = wb.Sheets[wb.SheetNames[0]];
+    const filedata = xlsx.utils.sheet_to_json(ws, {
+        header: 1,
+        blankrows: false,
+    });
 
-  //create new etfdata object
-  let data = await parseJsonData(etf, filedata);
-  let olddata = await getCurrentData(etf);
+    //create new etfdata object
+    let data = await parseJsonData(etf, filedata);
+    let olddata = await getCurrentData(etf);
 
-  if (!_.isEqual(data, olddata)) {
-    //check if old data existing
-    if (olddata.length !== 0) {
-      await moveDataToArchive(etf.id);
+    if (!_.isEqual(data, olddata)) {
+        //check if old data existing
+        if (olddata.length !== 0) {
+            await moveDataToArchive(etf.id);
+        }
+        await db["etfdata"].bulkCreate(data);
     }
-    await db["etfdata"].bulkCreate(data);
-  }
 };
 
 const deleteSpreadsheet = (filepath) => {
-  fs.unlinkSync(filepath);
+    fs.unlinkSync(filepath);
 };
 
 const parseJsonData = async (etf, data) => {
     let returnArray = [];
+    let stockData = {
+        name: null,
+        isin: null,
+        symbol: null,
+        sector: null,
+    };
+    let weight;
 
-  try {
-    const spreadsheetconfig = await getSpreadsheetconfig(etf.etfproviderid);
+    try {
+        const spreadsheetConfig = await getSpreadsheetconfig(etf);
+        for (let i = spreadsheetConfig.firstdataline; i < data.length; i++) {
+            stockData.name = null;
+            stockData.isin = null;
+            stockData.symbol = null;
+            stockData.sector = null;
+            weight = null;
 
-    for (let i = spreadsheetconfig.firstdataline; i < data.length; i++) {
-      const isin = data[i][spreadsheetconfig.isincolumn];
-      let weight = data[i][spreadsheetconfig.weightcolumn];
-      if (!isDecimal(weight)) {
-        continue;
-      }
-      weight = weight.toFixed(15);
+            stockData.name = data[i][spreadsheetConfig.namecolumn];
 
-      if (await stockManager.isISIN(isin)){
-          await stockManager.checkAndCreate(isin);
-      }
+            if (spreadsheetConfig.isincolumn !== null) {
+                stockData.isin = data[i][spreadsheetConfig.isincolumn];
+            } else if (spreadsheetConfig.symbolcolumn !== null) {
+                stockData.symbol = data[i][spreadsheetConfig.symbolcolumn];
+            }
 
-      returnArray.push({
-        etfid: etf.id,
-        isin: isin,
-        weight: weight,
-      });
+            if (spreadsheetConfig.sectorcolumn !== null) {
+                stockData.sector = data[i][spreadsheetConfig.sectorcolumn];
+            }
+
+            if (!spreadsheetConfig.recalculateweight) {
+                weight = data[i][spreadsheetConfig.weightcolumn];
+                if (!isDecimal(weight)) {
+                    continue;
+                }
+                weight = weight.toFixed(15);
+            }
+            let stockId = await stockManager.checkAndCreate(etf, stockData);
+
+            returnArray.push({
+                etfId: etf.id,
+                isin: stockData.isin,
+                symbol: stockData.symbol,
+                weight: weight,
+                stockId: stockId,
+            });
+        }
+        return returnArray;
+    } catch (err) {
+        console.log(err);
+        return err;
     }
-
-    return returnArray;
-  } catch (error) {
-    return error;
-  }
 };
 
 const getCurrentData = async (etf) => {
-  const currentdata = await db["etfdata"].findAll({
-    where: {
-      etfid: etf.id,
-    },
-  });
-
-  let returnArray = [];
-  currentdata.map((rec) => {
-    returnArray.push({
-      etfid: rec.etfid,
-      isin: rec.isin,
-      weight: rec.weight,
+    const currentdata = await db["etfdata"].findAll({
+        where: {
+            etfid: etf.id,
+        },
     });
-  });
 
-  return returnArray;
+    let returnArray = [];
+    currentdata.map((rec) => {
+        returnArray.push({
+            etfId: rec.etfid,
+            isin: rec.isin,
+            symbol: rec.symbol,
+            weight: rec.weight,
+            stockId: rec.stockId,
+        });
+    });
+
+    return returnArray;
 };
 
 const moveDataToArchive = async (etfid) => {
-  try {
-    await db.sequelize.query(
-      `INSERT INTO etfdataarchive SELECT * FROM etfdata WHERE etfid=${etfid}`
-    );
-    return await db["etfdata"].destroy({
-      where: {
-        etfid: etfid,
-      },
-    });
-  } catch (error) {
-    return error;
-  }
+    try {
+        await db.sequelize.query(
+            `INSERT INTO etfdataarchive SELECT * FROM etfdata WHERE etfId=${etfid}`
+        );
+        return await db["etfdata"].destroy({
+            where: {
+                etfId: etfid,
+            },
+        });
+    } catch (error) {
+        return error;
+    }
 };
 
-const getSpreadsheetconfig = async (etfproviderid) => {
-  try {
-    const etfprovider = await db["etfprovider"].findOne({
-      where: {
-        id: etfproviderid,
-      },
-    });
-
-    return await db["spreadsheetconfig"].findOne({
-      where: {
-        etfproviderid: etfprovider.id,
-      },
-    });
-  } catch (error) {
-    return error;
-  }
+const getSpreadsheetconfig = async (etf) => {
+    try {
+        const etfprovider = await etf.getEtfprovider();
+        const etfspreadsheetconf = await etfprovider.getSpreadsheetconfig();
+        return etfspreadsheetconf;
+    } catch (err) {
+        return err;
+    }
 };
 
 const isDecimal = (n) => {
-  const regex = /[-+]?([0-9]*[.])?[0-9]+([eE][-+]?\d+)?/;
-  return regex.test(n);
+    const regex = /[-+]?([0-9]*[.])?[0-9]+([eE][-+]?\d+)?/;
+    return regex.test(n);
 };
 
 module.exports = dataCrawler;

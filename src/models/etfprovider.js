@@ -16,6 +16,7 @@ module.exports = (sequelize, DataTypes) => {
     etfprovider.associate = function (models) {
         etfprovider.hasMany(models.etf, { as: "etfs" });
         etfprovider.hasOne(models.spreadsheetconfig);
+        etfprovider.hasOne(models.etfprovidersectorconfig)
     };
 
     return etfprovider;
