@@ -13,6 +13,10 @@ module.exports = (sequelize, DataTypes) => {
     {
         freezeTableName: true
     });
+    etfprovider.associate = function (models) {
+        etfprovider.hasMany(models.etf, { as: "etfs" });
+        etfprovider.hasOne(models.spreadsheetconfig);
+    };
 
     return etfprovider;
 }

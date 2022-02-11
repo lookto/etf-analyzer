@@ -1,14 +1,5 @@
 module.exports = (sequelize, DataTypes) => {
     const spreadsheetconfig = sequelize.define("spreadsheetconfig", {
-        etfproviderid: {
-            type: DataTypes.INTEGER,
-            allowNull: false,
-            unique: true,
-            references: {
-                key: 'id',
-                model: 'etfprovider'
-              }
-        },
         firstdataline: {
             type: DataTypes.INTEGER,
             allowNull: false,
@@ -24,10 +15,15 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.INTEGER,
             allowNull: false,
         }
+        
     },
     {
         freezeTableName: true
     });
+
+    spreadsheetconfig.associate = function (models) {
+        spreadsheetconfig.belongsTo(models.etfprovider);
+    };
 
     return spreadsheetconfig;
 }

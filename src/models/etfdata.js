@@ -1,22 +1,10 @@
 module.exports = (sequelize, DataTypes) => {
     const etfdata = sequelize.define("etfdata", {
-        id: {
-            type: DataTypes.INTEGER,
-            allowNull: false,
-            primaryKey: true,
-            autoIncrement: true
-        },
-        etfid: {
-            type: DataTypes.INTEGER,
-            allowNull: false,
-            references: {
-                key: 'id',
-                model: 'etf'
-              }
-        },
         isin: {
             type: DataTypes.STRING(12),
-            allowNull: false,
+        },
+        symbol: {
+            type: DataTypes.STRING(12),
         },
         weight: {
             type: DataTypes.DECIMAL(16,15),
@@ -27,5 +15,9 @@ module.exports = (sequelize, DataTypes) => {
         freezeTableName: true
     });
 
+    etfdata.associate = function (models) {
+        etfdata.belongsTo(models.etf);
+        etfdata.belongsTo(models.stock);
+    };
     return etfdata;
 }

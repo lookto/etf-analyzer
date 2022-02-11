@@ -1,32 +1,26 @@
 module.exports = (sequelize, DataTypes) => {
-    const stock = sequelize.define("stock", {
-        id: {
-            type: DataTypes.INTEGER,
-            allowNull: false,
-            primaryKey: true,
-            autoIncrement: true
+    const stock = sequelize.define(
+        "stock",
+        {
+            name: {
+                type: DataTypes.STRING,
+            },
+            isin: {
+                type: DataTypes.STRING(12),
+                unique: true
+            }
         },
-        name: {
-            type: DataTypes.STRING
-        },
-        isin: {
-            type: DataTypes.STRING(12),
-            unique: true
-        },
-        stocksectorid: {
-            type: DataTypes.INTEGER,
-            references: {
-                key: 'id',
-                model: 'stocksector'
-              }
-        },
-        country: {
-            type: DataTypes.STRING(2)
+        {
+            freezeTableName: true,
         }
-    },
-    {
-        freezeTableName: true
-    });
+    );
+
+    stock.associate = function (models) {
+        stock.hasMany(models.etfdata);
+        stock.hasMany(models.etfdataarchive);
+        stock.belongsTo(models.stocksector);
+        stock.belongsTo(models.country);
+    };
 
     return stock;
-}
+};
