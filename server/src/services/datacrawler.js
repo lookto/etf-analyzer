@@ -11,6 +11,7 @@ const dataCrawler = {
     crawlData: async function () {
         const etfs = await db["etf"].findAll();
         for (etf of etfs) {
+            console.log("Updating etf", etf.name);
             await crawlSpreadsheet(etf);
             //await crawlWebsite(etf);
         }
@@ -88,9 +89,26 @@ const parseJsonData = async (etf, data) => {
         sector: null,
     };
     let weight;
+    let weightsum = 0;
 
     try {
         const spreadsheetConfig = await getSpreadsheetconfig(etf);
+        if (spreadsheetConfig.recalculateweight) {
+            for (
+                let i = spreadsheetConfig.firstdataline;
+                i < data.length;
+                i++
+            ) {
+                weight = parseRawToInt(
+                    data[i][spreadsheetConfig.weightcolumn]
+                );
+
+                if (weight > 0) {
+                    weightsum = weightsum + weight;
+                }
+            }
+        }
+
         for (let i = spreadsheetConfig.firstdataline; i < data.length; i++) {
             stockData.name = null;
             stockData.isin = null;
@@ -114,7 +132,16 @@ const parseJsonData = async (etf, data) => {
             if (!isDecimal(weight)) {
                 continue;
             }
+            if (spreadsheetConfig.recalculateweight) {
+                weight = parseRawToInt(weight) / weightsum;
+                
+            }
             weight = weight.toFixed(15);
+            if (!(weight > 0)){
+                continue;
+            }
+            
+
             let stockId = await stockManager.checkAndCreate(etf, stockData);
 
             returnArray.push({
@@ -180,6 +207,12 @@ const getSpreadsheetconfig = async (etf) => {
 const isDecimal = (n) => {
     const regex = /[-+]?([0-9]*[.])?[0-9]+([eE][-+]?\d+)?/;
     return regex.test(n);
+};
+
+const parseRawToInt = (n) => {
+    if (n) {
+        return parseInt(n.slice(0, n.indexOf(",")).replaceAll(".", ""));
+    }
 };
 
 module.exports = dataCrawler;
