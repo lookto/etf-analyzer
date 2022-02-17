@@ -12,7 +12,8 @@ module.exports = (sequelize, DataTypes) => {
             symbol: {
                 type: DataTypes.STRING(20),
                 unique: true
-            }
+            },
+            
         },
         {
             freezeTableName: true,

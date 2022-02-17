@@ -67,6 +67,7 @@ const parseSpreadsheet = async (etf, filepath) => {
 
     if (!_.isEqual(data, olddata)) {
         //check if old data existing
+
         if (olddata.length !== 0) {
             await moveDataToArchive(etf.id);
         }
@@ -109,13 +110,11 @@ const parseJsonData = async (etf, data) => {
                 stockData.sector = data[i][spreadsheetConfig.sectorcolumn];
             }
 
-            if (!spreadsheetConfig.recalculateweight) {
-                weight = data[i][spreadsheetConfig.weightcolumn];
-                if (!isDecimal(weight)) {
-                    continue;
-                }
-                weight = weight.toFixed(15);
+            weight = data[i][spreadsheetConfig.weightcolumn];
+            if (!isDecimal(weight)) {
+                continue;
             }
+            weight = weight.toFixed(15);
             let stockId = await stockManager.checkAndCreate(etf, stockData);
 
             returnArray.push({
@@ -129,7 +128,6 @@ const parseJsonData = async (etf, data) => {
         return returnArray;
     } catch (err) {
         console.log(err);
-        return err;
     }
 };
 
@@ -143,7 +141,7 @@ const getCurrentData = async (etf) => {
     let returnArray = [];
     currentdata.map((rec) => {
         returnArray.push({
-            etfId: rec.etfid,
+            etfId: rec.etfId,
             isin: rec.isin,
             symbol: rec.symbol,
             weight: rec.weight,

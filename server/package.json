@@ -4,6 +4,7 @@
   "description": "a small tool to analyze your (future) etf portfolio regarding diversity ",
   "main": "src/app.js",
   "scripts": {
+    "start": "nodemon src/app.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
