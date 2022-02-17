@@ -13,6 +13,10 @@ module.exports = (sequelize, DataTypes) => {
                 type: DataTypes.STRING(20),
                 unique: true
             },
+            needsUpdate: {
+                type: DataTypes.BOOLEAN,
+                defaultValue: true,
+            },
             
         },
         {
