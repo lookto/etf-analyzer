@@ -3,9 +3,7 @@ const sectorManager = require("./stocksectormanager");
 const countryManager = require("./countrymanager");
 const etfDataManager = require("./etfdatamanager");
 const yahooFinance = require("yahoo-finance2").default;
-const { RateLimiter } = require("limiter");
-
-const yahooLimiter = new RateLimiter({ tokensPerInterval: 1, interval: 2000 });
+const { Op } = require("sequelize");
 
 const stockManager = {
     isISIN: async function (data) {
@@ -19,35 +17,38 @@ const stockManager = {
             return err;
         }
     },
-    isExisting: async function (isin, symbol) {
-        let stock;
-        //Refactor nötig, um Code zu minimieren
-        try {
-            if (isin) {
-                stock = await db["stock"].findOne({
-                    where: {
-                        isin,
-                    },
-                });
-                if (stock) {
-                    return stock.id;
-                }
-            }
-
-            if (symbol) {
-                stock = await db["stock"].findOne({
-                    where: {
-                        symbol,
-                    },
-                });
-                if (stock) {
-                    return stock.id;
-                }
-            }
-            return false;
-        } catch (err) {
-            return err;
+    getStock: async function (searchTerm) {
+        if (!searchTerm) {
+            return null;
         }
+
+        const stock = await db["stock"].findOne({
+            where: {
+                [Op.or]: searchTerm,
+            },
+        });
+
+        return stock || null;
+    },
+    getStockId: async function (searchTerm) {
+        if (!searchTerm) {
+            return null;
+        }
+
+        const stock = await this.getStock(searchTerm);
+
+        return stock?.id || null;
+    },
+    isStockExisting: async function (searchTerm) {
+        if (!searchTerm) {
+            return null;
+        }
+
+        const stock = await this.getStock(searchTerm);
+        if (stock) {
+            return true;
+        }
+        return false;
     },
     checkAndCreate: async function (etf, stockData) {
         if ((await this.isISIN(stockData.isin)) || stockData.symbol) {
@@ -56,7 +57,7 @@ const stockManager = {
                     stockData.isin,
                     stockData.symbol
                 );
-                if (!stockid) {
+                if (!this.isExisting({})) {
                     const stocksectorId = await sectorManager.getId(
                         stockData.sector,
                         etf.etfproviderId
@@ -89,44 +90,44 @@ const stockManager = {
         });
         try {
             if (stock) {
-            if (stock.isin) {
+                if (stock.isin) {
                     countryId = await countryManager.getIdByIso(
                         stock.isin.substr(0, 2)
                     );
                     console.log("Searching for ISIN ", stock.isin);
-                const query = await yahooFinance.search(stock.isin, {
-                    newsCount: 0,
-                });
+                    const query = await yahooFinance.search(stock.isin, {
+                        newsCount: 0,
+                    });
 
-                symbol = stock.symbol || query.quotes[0]?.symbol || null;
-                queryname = query.quotes[0]?.shortname || null;
-            } else if (stock.symbol) {
+                    symbol = stock.symbol || query.quotes[0]?.symbol || null;
+                    queryname = query.quotes[0]?.shortname || null;
+                } else if (stock.symbol) {
                     console.log("Searching for SYMBOL ", stock.symbol);
-                const query = await yahooFinance.query(stock.symbol, {
-                    fields: ["region", "shortName"],
-                });
-                countryId = await countryManager.getIdByIso(query?.region);
-                queryname = query?.shortName;
-            }
+                    const query = await yahooFinance.query(stock.symbol, {
+                        fields: ["region", "shortName"],
+                    });
+                    countryId = await countryManager.getIdByIso(query?.region);
+                    queryname = query?.shortName;
+                }
                 stockname = queryname || stock.name;
-            if (symbol) {
+                if (symbol) {
                     try {
                         await db["stock"].update(
-                    {
+                            {
                                 name: stockname,
-                        symbol,
-                        countryId,
+                                symbol,
+                                countryId,
                                 needsUpdate: false,
-                    },
-                    {
-                        where: {
-                            id: stock.id,
-                        },
-                    }
-                );
+                            },
+                            {
+                                where: {
+                                    id: stock.id,
+                                },
+                            }
+                        );
                     } catch (err) {
                         console.log("Rec already existing");
-                        await deleteDuplicate(stock,symbol);
+                        await deleteDuplicate(stock, symbol);
                     }
                 } else {
                     db["stock"].update(
@@ -145,8 +146,7 @@ const stockManager = {
             return err;
         }
     },
-
-}
+};
 const deleteDuplicate = async (stock, symbol) => {
     //get duplicate rec
     console.log("Delete Duplicate");
@@ -154,12 +154,12 @@ const deleteDuplicate = async (stock, symbol) => {
         const duplicateStock = await db["stock"].findOne({
             where: { symbol },
         });
-        console.log(duplicateStock.id)
+        console.log(duplicateStock.id);
 
         //update etfdata where duplicate record is used
         await etfDataManager.bulkUpdate(
             { stockId: stock.id },
-            { where: {stockId: duplicateStock.id} },
+            { where: { stockId: duplicateStock.id } },
             true
         );
 
@@ -171,7 +171,7 @@ const deleteDuplicate = async (stock, symbol) => {
         //update stock symbol
         await db["stock"].update({ symbol }, { where: { id: stock.id } });
     } catch (err) {
-        console.log(err)
+        console.log(err);
     }
 };
 

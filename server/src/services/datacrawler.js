@@ -5,7 +5,7 @@ const db = require("../models");
 const _ = require("lodash");
 const fs = require("fs");
 const stockManager = require("./stockmanager");
-const stock = require("../models/stock");
+const { getSpreadsheetConfigByEtf } = require("./spreadsheetconfigService");
 
 const dataCrawler = {
     crawlData: async function () {
@@ -82,75 +82,32 @@ const deleteSpreadsheet = (filepath) => {
 
 const parseJsonData = async (etf, data) => {
     let returnArray = [];
-    let stockData = {
-        name: null,
-        isin: null,
-        symbol: null,
-        sector: null,
-    };
-    let weight;
-    let weightsum = 0;
+    let totalWeight;
 
     try {
-        const spreadsheetConfig = await getSpreadsheetconfig(etf);
-        if (spreadsheetConfig.recalculateweight) {
-            for (
-                let i = spreadsheetConfig.firstdataline;
-                i < data.length;
-                i++
-            ) {
-                weight = parseRawToInt(
-                    data[i][spreadsheetConfig.weightcolumn]
-                );
-
-                if (weight > 0) {
-                    weightsum = weightsum + weight;
-                }
-            }
+        const config = await getSpreadsheetConfigByEtf(etf);
+        if (config.recalculateWeight) {
+            totalWeight = calculateTotalWeight(data, config);
         }
 
-        for (let i = spreadsheetConfig.firstdataline; i < data.length; i++) {
-            stockData.name = null;
-            stockData.isin = null;
-            stockData.symbol = null;
-            stockData.sector = null;
-            weight = null;
-
-            stockData.name = data[i][spreadsheetConfig.namecolumn];
-
-            if (spreadsheetConfig.isincolumn !== null) {
-                stockData.isin = data[i][spreadsheetConfig.isincolumn];
-            } else if (spreadsheetConfig.symbolcolumn !== null) {
-                stockData.symbol = data[i][spreadsheetConfig.symbolcolumn];
-            }
-
-            if (spreadsheetConfig.sectorcolumn !== null) {
-                stockData.sector = data[i][spreadsheetConfig.sectorcolumn];
-            }
-
-            weight = data[i][spreadsheetConfig.weightcolumn];
-            if (!isDecimal(weight)) {
-                continue;
-            }
-            if (spreadsheetConfig.recalculateweight) {
-                weight = parseRawToInt(weight) / weightsum;
-                
-            }
-            weight = weight.toFixed(15);
-            if (!(weight > 0)){
-                continue;
-            }
-            
+        for (let i = config.firstDataLine; i < data.length; i++) {
+            const stockData = await parseStockData(
+                data[i],
+                config,
+                totalWeight
+            );
 
             let stockId = await stockManager.checkAndCreate(etf, stockData);
 
-            returnArray.push({
-                etfId: etf.id,
-                isin: stockData.isin,
-                symbol: stockData.symbol,
-                weight: weight,
-                stockId: stockId,
-            });
+            if (stockData) {
+                returnArray.push({
+                    etfId: etf.id,
+                    isin: stockData.isin,
+                    symbol: stockData.symbol,
+                    weight: stockData.weight,
+                    stockId: stockId,
+                });
+            }
         }
         return returnArray;
     } catch (err) {
@@ -209,10 +166,59 @@ const isDecimal = (n) => {
     return regex.test(n);
 };
 
-const parseRawToInt = (n) => {
+const parseRawStringToInt = (n) => {
     if (n) {
         return parseInt(n.slice(0, n.indexOf(",")).replaceAll(".", ""));
     }
+};
+
+const calculateTotalWeight = (data, config) => {
+    if (!data || !config) {
+        return null;
+    }
+
+    filteredPositions = data.filter(
+        (position) => parseRawStringToInt(position[config.weightColumn]) > 0
+    );
+    totalWeight = filteredPositions.reduce(
+        (prev, position) =>
+            prev + parseRawStringToInt(position[config.weightColumn]),
+        0
+    );
+    return totalWeight;
+};
+
+const parseStockData = async (data, config, totalWeight) => {
+    if (!data || !config) {
+        return null;
+    }
+
+    let stockData = {
+        name: null,
+        isin: null,
+        symbol: null,
+        sector: null,
+        weight: null,
+    };
+
+    stockData.name = data[config.nameColumn] || null;
+    stockData.isin = config.isinColum ? data[config.isinColumn] : null;
+    stockData.symbol = config.symbolColumn ? data[config.symbolColumn] : null;
+    stockData.sector = config.sectorColumn ? data[config.symbolColumn] : null;
+
+    stockData.weight =
+        isDecimal(data[config.weightColumn]) &&
+        config.recalculateweight === true
+            ? parseRawStringToInt(data[config.weightColumn]) / totalWeight
+            : isDecimal(data[config.weightColum])
+            ? data[config.weightColumn]
+            : null;
+
+    if (stockData.weight) {
+        stockData.weight = stockData.weight.toFixed(15);
+    }
+
+    return stockData.weight > 0 ? stockData : null;
 };
 
 module.exports = dataCrawler;

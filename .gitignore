@@ -104,5 +104,4 @@ dist
 .tern-port
 .vscode/settings.json
 .gitignore
-src/config/config.json
-server/src/config/config.json
+server/config/config.json
