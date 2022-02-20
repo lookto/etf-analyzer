@@ -1,21 +1,40 @@
 const db = require("../models");
-const sectorManager = require("./stocksectormanager");
-const countryManager = require("./countrymanager");
+const sectorsectorService = require("./stocksectorService");
+const countryService = require("./countryService");
 const etfDataManager = require("./etfdatamanager");
 const yahooFinance = require("yahoo-finance2").default;
-const { Op } = require("sequelize");
 
 const stockManager = {
-    isISIN: async function (data) {
+    createStock: async function (rec) {
+        if (!rec) {
+            return null;
+        }
+
+        const stock = await db["stock"].create(rec);
+
+        return stock.id || null;
+    },
+    updateStock: async function (data, rec) {
+        if (!data || !rec) {
+            return;
+        }
         try {
-            const country = await countryManager.getRecByIso(data.substr(0, 2));
-            if (country) {
-                return true;
-            }
-            return false;
+            await db["stock"].update(data, {
+                where: rec,
+            });
         } catch (err) {
             return err;
         }
+    },
+    isISIN: async function (isin) {
+        if (!isin) {
+            return null;
+        }
+        const countryIsExisting = await countryService.isExisting({
+            isocode: isin.substr(0, 2),
+        });
+
+        return countryIsExisting;
     },
     getStock: async function (searchTerm) {
         if (!searchTerm) {
@@ -23,9 +42,7 @@ const stockManager = {
         }
 
         const stock = await db["stock"].findOne({
-            where: {
-                [Op.or]: searchTerm,
-            },
+            where: searchTerm,
         });
 
         return stock || null;
@@ -51,99 +68,95 @@ const stockManager = {
         return false;
     },
     checkAndCreate: async function (etf, stockData) {
-        if ((await this.isISIN(stockData.isin)) || stockData.symbol) {
-            try {
-                const stockid = await this.isExisting(
-                    stockData.isin,
-                    stockData.symbol
-                );
-                if (!this.isExisting({})) {
-                    const stocksectorId = await sectorManager.getId(
-                        stockData.sector,
-                        etf.etfproviderId
-                    );
-                    const stock = await db["stock"].create({
-                        name: stockData.name,
-                        isin: stockData.isin,
-                        symbol: stockData.symbol,
-                        stocksectorId,
-                    });
-                    return stock.id;
-                }
-                return stockid;
-            } catch (err) {
-                console.log(err);
-                return null;
-            }
-        } else {
+        if (!(await this.isISIN(stockData.isin)) && !stockData.symbol) {
             return null;
         }
+
+        const stockId =
+            (await this.getStockId({ isin: stockData.isin })) ||
+            (await this.getStockId({ symbol: stockData.symbol })) ||
+            null;
+
+        if (stockId) {
+            return stockId;
+        }
+
+        const stocksectorId = await sectorsectorService.getId(
+            stockData.sector,
+            etf.etfproviderId
+        );
+
+        stockId = await this.createStock({
+            name: stockData.name,
+            isin: stockData.isin,
+            symbol: stockData.symbol,
+            stocksectorId,
+        });
+        return stockId;
     },
     updateStocks: async function () {
-        let countryId;
-        let queryname;
-        let stockname;
-        let stock = await db["stock"].findOne({
-            where: {
-                needsUpdate: true,
-            },
-        });
-        try {
-            if (stock) {
-                if (stock.isin) {
-                    countryId = await countryManager.getIdByIso(
-                        stock.isin.substr(0, 2)
-                    );
-                    console.log("Searching for ISIN ", stock.isin);
-                    const query = await yahooFinance.search(stock.isin, {
-                        newsCount: 0,
-                    });
+        const stock = await stockManager.getStock({ needsUpdate: true });
 
-                    symbol = stock.symbol || query.quotes[0]?.symbol || null;
-                    queryname = query.quotes[0]?.shortname || null;
-                } else if (stock.symbol) {
-                    console.log("Searching for SYMBOL ", stock.symbol);
-                    const query = await yahooFinance.query(stock.symbol, {
-                        fields: ["region", "shortName"],
-                    });
-                    countryId = await countryManager.getIdByIso(query?.region);
-                    queryname = query?.shortName;
-                }
-                stockname = queryname || stock.name;
-                if (symbol) {
-                    try {
-                        await db["stock"].update(
-                            {
-                                name: stockname,
-                                symbol,
-                                countryId,
-                                needsUpdate: false,
-                            },
-                            {
-                                where: {
-                                    id: stock.id,
-                                },
-                            }
-                        );
-                    } catch (err) {
-                        console.log("Rec already existing");
-                        await deleteDuplicate(stock, symbol);
-                    }
-                } else {
-                    db["stock"].update(
+        if (!stock) {
+            return;
+        }
+        console.log("Update Stock", stock.name);
+
+        if (stock.symbol) {
+            const search = await yahooApiQuote(stock.symbol);
+
+            if (search?.shortName && search?.region) {
+                const countryId = await countryService.getId({
+                    isocode: search.region,
+                });
+
+                try {
+                    await stockManager.updateStock(
                         {
+                            name: search.shortName,
+                            countryId,
                             needsUpdate: false,
                         },
-                        {
-                            where: {
-                                id: stock.id,
-                            },
-                        }
+                        { id: stock.id }
                     );
+                } catch (err) {
+                    console.log(err);
                 }
+                return;
             }
-        } catch (err) {
-            return err;
+
+            await stockManager.updateStock(
+                { needsUpdate: false },
+                { id: stock.id }
+            );
+            return;
+        }
+
+        if (stock.isin) {
+            const countryId = await countryService.getId({
+                isocode: stock.isin.substr(0, 2),
+            });
+            const search = await yahooApiSearch(stock.isin);
+            if (!search) {
+                await stockManager.updateStock(
+                    { needsUpdate: false },
+                    { id: stock.id }
+                );
+                return;
+            }
+            try {
+                await stockManager.updateStock(
+                    {
+                        name: search.shortName,
+                        countryId,
+                        symbol: search.symbol,
+                        needsUpdate: false,
+                    },
+                    { id: stock.id }
+                );
+            } catch (err) {
+                console.log(err);
+            }
         }
     },
 };
@@ -173,6 +186,61 @@ const deleteDuplicate = async (stock, symbol) => {
     } catch (err) {
         console.log(err);
     }
+};
+
+const yahooApiSearch = async (searchTerm) => {
+    let searchResults = {
+        shortName: null,
+        symbol: null,
+    };
+
+    if (!searchTerm) {
+        return null;
+    }
+
+    const query = await yahooFinance.search(searchTerm, {
+        newsCount: 0,
+    });
+
+    if (!query.quotes[0]) {
+        return null;
+    }
+
+    searchResults.shortName = query.quotes[0]?.shortname || null;
+    searchResults.symbol = query.quotes[0]?.symbol || null;
+
+    return searchResults;
+};
+
+const yahooApiQuote = async (searchTerm) => {
+    console.log("Suche mit YahooApiQuote");
+    let searchResults = {
+        shortName: null,
+        region: null,
+    };
+    let query;
+
+    if (!searchTerm) {
+        return;
+    }
+
+    try {
+        query = await yahooFinance.quote(searchTerm, {
+            fields: ["region", "shortName"],
+        });
+    } catch (err) {
+        console.log(err);
+        return;
+    }
+
+    if (query?.name === "TypeError") {
+        return;
+    }
+
+    searchResults.shortName = query?.shortName || null;
+    searchResults.region = query?.region || null;
+
+    return searchResults;
 };
 
 module.exports = stockManager;

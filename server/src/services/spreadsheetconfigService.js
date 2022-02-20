@@ -11,7 +11,7 @@ const spreadsheetConfigService = {
         return (config = {
             firstDataLine: etfSpreadsheetConfig.firstdataline,
             nameColumn: etfSpreadsheetConfig.namecolumn,
-            isincColumn: etfSpreadsheetConfig.isincolumn,
+            isinColumn: etfSpreadsheetConfig.isincolumn,
             symbolColumn: etfSpreadsheetConfig.symbolcolumn,
             sectorColumn: etfSpreadsheetConfig.sectorcolumn,
             weightColumn: etfSpreadsheetConfig.weightcolumn,

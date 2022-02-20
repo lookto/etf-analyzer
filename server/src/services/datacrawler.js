@@ -97,6 +97,10 @@ const parseJsonData = async (etf, data) => {
                 totalWeight
             );
 
+            if (!stockData) {
+                continue;
+            }
+
             let stockId = await stockManager.checkAndCreate(etf, stockData);
 
             if (stockData) {
@@ -202,19 +206,15 @@ const parseStockData = async (data, config, totalWeight) => {
     };
 
     stockData.name = data[config.nameColumn] || null;
-    stockData.isin = config.isinColum ? data[config.isinColumn] : null;
+    stockData.isin = config.isinColumn ? data[config.isinColumn] : null;
     stockData.symbol = config.symbolColumn ? data[config.symbolColumn] : null;
-    stockData.sector = config.sectorColumn ? data[config.symbolColumn] : null;
+    stockData.sector = config.sectorColumn ? data[config.sectorColumn] : null;
 
-    stockData.weight =
-        isDecimal(data[config.weightColumn]) &&
-        config.recalculateweight === true
-            ? parseRawStringToInt(data[config.weightColumn]) / totalWeight
-            : isDecimal(data[config.weightColum])
-            ? data[config.weightColumn]
-            : null;
-
-    if (stockData.weight) {
+    if (isDecimal(data[config.weightColumn])) {
+        stockData.weight =
+            config.recalculateWeight === true
+                ? parseRawStringToInt(data[config.weightColumn]) / totalWeight
+                : data[config.weightColumn];
         stockData.weight = stockData.weight.toFixed(15);
     }
 
