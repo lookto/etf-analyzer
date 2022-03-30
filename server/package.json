@@ -13,17 +13,21 @@
         "portfolio",
         "diversity"
     ],
+    "bin": {
+        "datamanager": "src/bin/index.js"
+    },
     "author": "Lukas Tüllmann",
     "license": "MIT",
     "dependencies": {
         "fs": "^0.0.1-security",
+        "inquirer": "^8.2.2",
         "lodash": "^4.17.21",
         "mysql2": "^2.3.3",
+        "node-cron": "^3.0.0",
         "nodejs-file-downloader": "^4.9.2",
         "path": "^0.12.7",
         "sequelize": "^6.13.0",
         "sequelize-cli": "^6.4.1",
-        "xlsx": "^0.17.4",
-        "yahoo-finance2": "^2.1.2"
+        "xlsx": "^0.17.4"
     }
 }

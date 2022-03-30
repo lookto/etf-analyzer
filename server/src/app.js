@@ -1,13 +1,22 @@
-const db = require("./models");
-const dataCrawler = require("./services/datacrawler");
-const stockManager = require("./services/stockmanager");
+const db = require("./models/");
+const cron = require("node-cron");
 
-const main = async () => {
+const { crawlEtfData } = require("./services/crawlerService");
+const { setUpdateTrigger } = require("./services/etfService");
+
+const init = async () => {
+    //Open and sync db
     await db.sequelize.sync();
-    console.log("db sync done");
-    dataCrawler.crawlData();
 
-    let stockupdater = setInterval(stockManager.updateStocks, 2000);
+    //Cron job for setting the update trigger on etfs every monday @2am
+    cron.schedule("* 2 * * 1", () => {
+        setUpdateTrigger();
+    });
+
+    //Cron job for crawling etf data every 15s
+    cron.schedule("15 * * * * *", () => {
+        crawlEtfData();
+    });
 };
 
-main();
+init();

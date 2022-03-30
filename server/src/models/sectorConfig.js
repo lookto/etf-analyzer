@@ -1,19 +1,20 @@
 module.exports = (sequelize, DataTypes) => {
-    const etfindex = sequelize.define(
-        "etfindex",
+    const sectorConfig = sequelize.define(
+        "sectorConfig",
         {
             name: {
                 type: DataTypes.STRING,
                 allowNull: false,
-                unique: true,
             },
         },
         {
             freezeTableName: true,
         }
     );
-    etfindex.associate = function (models) {
-        etfindex.hasMany(models.etf, { as: "etfs" });
+
+    sectorConfig.associate = function (models) {
+        sectorConfig.belongsTo(models.sector);
+        sectorConfig.belongsTo(models.etfProvider);
     };
-    return etfindex;
+    return sectorConfig;
 };

@@ -1,34 +1,27 @@
 const db = require("../models");
 
-const countryService = {
-    getCountry: async function (searchTerm) {
-        if (!searchTerm) {
-            return null;
-        }
+const getCountry = async (searchTerm) => {
+    if (!searchTerm) return;
 
+    try {
         const country = await db["country"].findOne({
             where: searchTerm,
         });
-
         return country || null;
-    },
-    getId: async function (searchTerm) {
-        if (!searchTerm) {
-            return null;
-        }
-        const country = await this.getCountry(searchTerm);
-
-        return country?.id || null;
-    },
-    isExisting: async function (searchTerm) {
-        if (!searchTerm) {
-            return null;
-        }
-
-        const country = await this.getCountry(searchTerm);
-
-        return country ? true : false;
-    },
+    } catch (err) {
+        console.log(err);
+    }
 };
 
-module.exports = countryService;
+const getId = async (searchTerm) => {
+    if (!searchTerm) return;
+
+    try {
+        const country = await getCountry(searchTerm);
+        return country.id || null;
+    } catch (err) {
+        console.log(err);
+    }
+};
+
+module.exports = {};

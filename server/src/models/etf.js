@@ -1,5 +1,3 @@
-const etfindex = require("./etfindex");
-
 module.exports = (sequelize, DataTypes) => {
     const etf = sequelize.define(
         "etf",
@@ -19,7 +17,18 @@ module.exports = (sequelize, DataTypes) => {
             },
             active: {
                 type: DataTypes.BOOLEAN,
-            }
+                allowNull: false,
+            },
+            update: {
+                type: DataTypes.BOOLEAN,
+                allowNull: false,
+                defaultValue: false,
+            },
+            failed: {
+                type: DataTypes.BOOLEAN,
+                allowNull: false,
+                defaultValue: false,
+            },
         },
         {
             freezeTableName: true,
@@ -27,10 +36,10 @@ module.exports = (sequelize, DataTypes) => {
     );
 
     etf.associate = function (models) {
-        etf.belongsTo(models.etfindex);
-        etf.belongsTo(models.etfprovider);
-        etf.hasMany(models.etfdata)
-        etf.hasMany(models.etfdataarchive)
+        etf.belongsTo(models.etfIndex);
+        etf.belongsTo(models.etfProvider);
+        etf.hasMany(models.etfData);
+        etf.hasMany(models.etfDataArchive);
     };
 
     return etf;

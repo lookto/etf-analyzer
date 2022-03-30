@@ -1,6 +1,6 @@
 module.exports = (sequelize, DataTypes) => {
-    const stocksector = sequelize.define(
-        "stocksector",
+    const etfIndex = sequelize.define(
+        "etfIndex",
         {
             name: {
                 type: DataTypes.STRING,
@@ -12,11 +12,8 @@ module.exports = (sequelize, DataTypes) => {
             freezeTableName: true,
         }
     );
-
-    stocksector.associate = function (models) {
-        stocksector.hasMany(models.stock);
-        stocksector.hasMany(models.etfprovidersectorconfig);
+    etfIndex.associate = function (models) {
+        etfIndex.hasMany(models.etf);
     };
-
-    return stocksector;
+    return etfIndex;
 };

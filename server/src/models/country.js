@@ -7,7 +7,10 @@ module.exports = (sequelize, DataTypes) => {
                 allowNull: true,
                 unique: true,
             },
-            isocode: {
+            translation_de: {
+                type: DataTypes.STRING,
+            },
+            isoCode: {
                 type: DataTypes.STRING(2),
                 allowNull: false,
                 unique: true,
@@ -19,12 +22,14 @@ module.exports = (sequelize, DataTypes) => {
         },
         {
             freezeTableName: true,
+            timestamps: false,
         }
     );
 
     country.associate = function (models) {
-        country.hasMany(models.stock);
-    }
+        country.hasMany(models.etfData);
+        country.hasMany(models.etfDataArchive);
+    };
 
     return country;
 };
