@@ -95,7 +95,6 @@ const mapDataToCountryId = async (country, { etfProviderId }) => {
 
     try {
         const countryId = await getCountryId(country, etfProviderId);
-        console.log("Country id:", countryId);
 
         return countryId;
     } catch (err) {

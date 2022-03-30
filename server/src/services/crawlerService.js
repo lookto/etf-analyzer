@@ -26,7 +26,6 @@ const crawlEtfData = async () => {
     const oldData = await getEtfData({ etfId: etf.id });
     //check if data changed
     if (!_.isEqual(cumulatedData, oldData)) {
-        console.log("Daten sind neu");
         await bulkCreateEtfData(cumulatedData, true, etf);
     }
 
