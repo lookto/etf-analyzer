@@ -17,7 +17,6 @@
         "datamanager": "src/bin/index.js"
     },
     "author": "Lukas Tüllmann",
-    "license": "MIT",
     "dependencies": {
         "fs": "^0.0.1-security",
         "inquirer": "^8.2.2",
