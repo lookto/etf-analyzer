@@ -7,6 +7,7 @@ const getSpreadsheetConfigByEtf = async ({ etfProviderId }) => {
 
     if (spreadsheetConfig) {
         const mappedspreadsheetConfig = {
+            etfProviderId: spreadsheetConfig.etfProviderId,
             firstDataLine: spreadsheetConfig.firstDataLine,
             isinColumn: spreadsheetConfig.isinColumn,
             countryColumn: spreadsheetConfig.countryColumn,
