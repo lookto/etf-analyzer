@@ -50,15 +50,16 @@ const updateConfigs = async (etfProviderId) => {
     if (!etfProviderId) return;
 
     const dir = path.join(__dirname, "../temp/");
-
+    const { firstDataLine, countryColumn } = await getSpreadsheetConfigByEtf({
+        etfProviderId,
+    });
     const etfs = await getAllEtfs({ etfProviderId });
     let countriesInEtfs = [];
     for (const etf of etfs) {
         const filePath = await downloadFile(etf.urlDatasheet, dir, etf.isin);
         const parsedData = loadSpreadsheetToJson(filePath);
         deleteFile(filePath);
-        const { firstDataLine, countryColumn } =
-            await getSpreadsheetConfigByEtf(etf);
+
         const filteredData = parsedData.filter((data, index) => {
             return index >= firstDataLine;
         });
