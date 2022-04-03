@@ -10,6 +10,7 @@ const {
 } = require("./etfDataService");
 
 const crawlEtfData = async () => {
+    try {
     console.log("Checking for etf data to update");
     const etf = await getEtf({ update: true, failed: false });
 
@@ -30,6 +31,8 @@ const crawlEtfData = async () => {
     }
 
     updateEtf({ update: false }, { id: etf.id });
+    } catch (err) {
+    }
 };
 
 module.exports = { crawlEtfData };
