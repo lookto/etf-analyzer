@@ -18,7 +18,7 @@ const getId = async (searchTerm) => {
 
     try {
         const country = await getCountry(searchTerm);
-        return country.id || null;
+        return country?.id || null;
     } catch (err) {
         console.log(err);
     }
