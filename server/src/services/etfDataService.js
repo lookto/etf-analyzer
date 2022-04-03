@@ -43,7 +43,6 @@ const bulkCreateEtfData = async (recs, moveToArchive = false, { id }) => {
             });
         }
         db["etfData"].bulkCreate(recs);
-
     } catch (err) {
         console.log(err);
     }
@@ -72,11 +71,15 @@ const mapData = async (data, etf) => {
             etf
         );
 
-        const sectorId = await mapDataToSectorId(
-            data[spreadsheetConfig.sectorColumn],
-            sectorConfig
+        const sectorId =
+            etf.sectorId ||
+            (await mapDataToSectorId(
+                data[spreadsheetConfig.sectorColumn],
+                sectorConfig
+            ));
+        const weight = parseFloat(
+            data[spreadsheetConfig.weightColumn].toFixed(15)
         );
-        const weight = data[spreadsheetConfig.weightColumn];
         mappedData.push({ countryId, sectorId, weight });
     }
 
@@ -124,7 +127,7 @@ const calculatePercentageWeights = (data) => {
 
     const recalculatedData = data.map((item) => ({
         ...item,
-        weight: (item.weight / totalWeight).toFixed(15),
+        weight: item.weight / totalWeight,
     }));
 
     return recalculatedData;
@@ -164,11 +167,18 @@ const cumulateSectorWeights = (data, etfId) => {
     });
 
     const cumulatedData = groupedData.map((sector) => {
-        const weight = sector.data.reduce((total, stock) => {
-            return total + stock.weight;
-        }, 0);
+        const weight = sector.data
+            .reduce((total, stock) => {
+                return total + stock.weight;
+            }, 0)
+            .toFixed(15);
 
-        return { etfId, countryId: null, sectorId: sector.group, weight };
+        return {
+            etfId,
+            countryId: null,
+            sectorId: sector.group,
+            weight,
+        };
     });
 
     return cumulatedData;
@@ -192,11 +202,18 @@ const cumulateCountryWeights = (data, etfId) => {
     });
 
     const cumulatedData = groupedData.map((country) => {
-        const weight = country.data.reduce((total, stock) => {
-            return total + stock.weight;
-        }, 0);
+        const weight = country.data
+            .reduce((total, stock) => {
+                return total + stock.weight;
+            }, 0)
+            .toFixed(15);
 
-        return { etfId, countryId: country.group, sectorId: null, weight };
+        return {
+            etfId,
+            countryId: country.group,
+            sectorId: null,
+            weight,
+        };
     });
 
     return cumulatedData;

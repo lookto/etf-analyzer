@@ -40,6 +40,7 @@ module.exports = (sequelize, DataTypes) => {
     etf.associate = function (models) {
         etf.belongsTo(models.etfIndex);
         etf.belongsTo(models.etfProvider);
+        etf.belongsTo(models.sector);
         etf.hasMany(models.etfData);
         etf.hasMany(models.etfDataArchive);
     };
