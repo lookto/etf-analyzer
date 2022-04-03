@@ -4,15 +4,14 @@ const getSectorConfigByEtf = async ({ etfProviderId }) => {
     if (!etfProviderId) return;
 
     const sectorConfigs = await getAllSectorConfigs({ etfProviderId });
-    let mappedSectorConfig;
     if (sectorConfigs) {
-        mappedSectorConfig = sectorConfigs.map(({ sectorId, name }) => ({
+        const mappedSectorConfig = sectorConfigs.map(({ sectorId, name }) => ({
             sectorId,
             name,
+            etfProviderId,
         }));
+        return mappedSectorConfig;
     }
-
-    return mappedSectorConfig || null;
 };
 
 const getAllSectorConfigs = async (searchTerm) => {
