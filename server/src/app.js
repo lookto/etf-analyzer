@@ -14,7 +14,7 @@ const init = async () => {
     });
 
     //Cron job for crawling etf data every 15s
-    cron.schedule("15 * * * * *", () => {
+    cron.schedule("*/15 * * * * *", () => {
         crawlEtfData();
     });
 };
