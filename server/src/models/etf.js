@@ -5,6 +5,7 @@ module.exports = (sequelize, DataTypes) => {
             name: {
                 type: DataTypes.STRING,
                 unique: true,
+                allowNull: false,
             },
             urlDatasheet: {
                 type: DataTypes.STRING,
@@ -18,6 +19,7 @@ module.exports = (sequelize, DataTypes) => {
             active: {
                 type: DataTypes.BOOLEAN,
                 allowNull: false,
+                defaultValue: false,
             },
             update: {
                 type: DataTypes.BOOLEAN,
