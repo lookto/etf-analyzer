@@ -11,27 +11,26 @@ const {
 
 const crawlEtfData = async () => {
     try {
-    console.log("Checking for etf data to update");
-    const etf = await getEtf({ update: true, failed: false });
+        console.log("Checking for etf data to update");
+        const etf = await getEtf({ update: true, failed: false });
 
-    if (!etf) return;
+        if (!etf) return;
+        updateEtf({ update: false }, { id: etf.id });
+        console.log("Updating etf", etf.name);
 
-    console.log("Updating etf", etf.name);
+        const dl = await downloadFile(etf.urlDatasheet, etf.isin);
+        const data = loadSpreadsheetToJson(dl);
+        deleteFile(dl);
+        const rawEtfData = await mapData(data, etf);
+        const cumulatedData = cumulateWeights(rawEtfData, etf);
 
-    const dl = await downloadFile(etf.urlDatasheet, etf.isin);
-    const data = loadSpreadsheetToJson(dl);
-    deleteFile(dl);
-    const rawEtfData = await mapData(data, etf);
-    const cumulatedData = cumulateWeights(rawEtfData, etf);
-
-    const oldData = await getEtfData({ etfId: etf.id });
-    //check if data changed
-    if (!_.isEqual(cumulatedData, oldData)) {
-        await bulkCreateEtfData(cumulatedData, true, etf);
-    }
-
-    updateEtf({ update: false }, { id: etf.id });
+        const oldData = await getEtfData({ etfId: etf.id });
+        //check if data changed
+        if (!_.isEqual(cumulatedData, oldData)) {
+            await bulkCreateEtfData(cumulatedData, true, etf);
+        }
     } catch (err) {
+        updateEtf({ failed: true }, { id: etf.id });
     }
 };
 
