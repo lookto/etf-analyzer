@@ -98,7 +98,7 @@ const cleanUpWeightData = (
     }
 
     if (recalculateWeight === true) {
-        cleanedData = recalculateWeights(cleanedData);
+        cleanedData = calculatePercentageWeights(cleanedData);
     }
 
     return cleanedData;
@@ -109,20 +109,22 @@ const convertWeightsToDecimal = (data) => {
 
     const convertedData = data.map((item) => ({
         ...item,
-        weight: parseFloat(weight.replaceAll(".", "").replaceAll(",", ".")),
+        weight: parseFloat(
+            item.weight.replaceAll(".", "").replaceAll(",", ".")
+        ),
     }));
 
     return convertedData;
 };
 
-const recalculateWeights = (data) => {
+const calculatePercentageWeights = (data) => {
     if (!data) return;
 
     const totalWeight = calculateTotalWeight(data);
 
     const recalculatedData = data.map((item) => ({
         ...item,
-        weight: (weight / totalWeight).toFixed(15),
+        weight: (item.weight / totalWeight).toFixed(15),
     }));
 
     return recalculatedData;
