@@ -4,6 +4,7 @@
 const inquirer = require("inquirer");
 const { getAllEtfProviders } = require("../services/etfProviderService");
 const { updateConfigs } = require("../services/countryConfigService");
+const { updateSectorConfigs } = require("../services/sectorConfigService");
 
 const taskInquirer = () => {
     inquirer
@@ -33,11 +34,15 @@ const updateDataInquirer = () => {
                 type: "list",
                 name: "updatechoice",
                 message: "Which data do you want do update?",
-                choices: ["Country Config"],
+                choices: ["Country Config", "Sector Config"],
             },
         ])
         .then((answers) => {
-            updateCountryConfigInquirer();
+            if (answers.updatechoice === "Country Config") {
+                updateCountryConfigInquirer();
+            } else if (answers.updatechoice === "Sector Config") {
+                updateSectorConfigInquirer();
+            }
         });
 };
 
@@ -62,6 +67,30 @@ const updateCountryConfigInquirer = async () => {
                 return etfProvider.name === answers.etfProviderChoice;
             });
             updateCountryConfigs(etfProvider.id);
+        });
+};
+
+const updateSectorConfigInquirer = async () => {
+    let etfProviders = await getAllEtfProviders(true);
+    etfProviders = etfProviders.sort((a, b) => {
+        return a.name.localeCompare(b.name);
+    });
+
+    inquirer
+        .prompt([
+            {
+                type: "list",
+                name: "etfProviderChoice",
+                message:
+                    "For which etf provider you want to upgrade the sector configs?",
+                choices: etfProviders,
+            },
+        ])
+        .then((answers) => {
+            const etfProvider = etfProviders.find((etfProvider) => {
+                return etfProvider.name === answers.etfProviderChoice;
+            });
+            updateSectorConfigs(etfProvider.id);
         });
 };
 
