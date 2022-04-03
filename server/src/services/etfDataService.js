@@ -14,7 +14,7 @@ const getEtfData = async (searchTerm) => {
             where: searchTerm,
         });
 
-        mappedEtfData = etfData.map(
+        const mappedEtfData = etfData.map(
             ({ etfId, countryId, sectorId, weight }) => ({
                 etfId,
                 countryId,
@@ -42,23 +42,8 @@ const bulkCreateEtfData = async (recs, moveToArchive = false, { id }) => {
                 },
             });
         }
-        const etfData = db["etfData"].bulkCreate(recs);
-        return etfData || null;
-    } catch (err) {
-        console.log(err);
-    }
-};
+        db["etfData"].bulkCreate(recs);
 
-const bulkUpdate = async (newData, whereParameter, updateArchive = false) => {
-    try {
-        const recs = await db["etfdata"].update(newData, {
-            where: whereParameter,
-        });
-        if (updateArchive) {
-            const recs = await db["etfdataarchive"].update(newData, {
-                where: whereParameter,
-            });
-        }
     } catch (err) {
         console.log(err);
     }
