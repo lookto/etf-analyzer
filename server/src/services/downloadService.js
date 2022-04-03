@@ -14,8 +14,8 @@ const downloadFile = async (url, newFileName = "", dir = DIR_TEMP) => {
         directory: dir,
         onBeforeSave: (deducedName) => {
             if (newFileName) {
-            fileName = `${newFileName}${path.extname(deducedName)}`;
-            return fileName;
+                fileName = `${newFileName}${path.extname(deducedName)}`;
+                return fileName;
             }
             return deducedName;
         },
