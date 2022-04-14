@@ -13,8 +13,8 @@ const init = async () => {
         setUpdateTrigger();
     });
 
-    //Cron job for crawling etf data every 15s
-    cron.schedule("*/15 * * * * *", () => {
+    //Cron job for crawling etf data every 5s
+    cron.schedule("*/5 * * * * *", () => {
         crawlEtfData();
     });
 };

@@ -3,7 +3,7 @@ module.exports = (sequelize, DataTypes) => {
         "etfDataArchive",
         {
             weight: {
-                type: DataTypes.STRING,
+                type: DataTypes.DECIMAL(11, 10),
                 allowNull: false,
             },
         },

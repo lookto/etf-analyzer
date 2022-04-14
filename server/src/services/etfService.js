@@ -9,10 +9,23 @@ const getAllEtfs = async (searchTerm = {}) => {
 
 const getEtf = async (searchTerm = {}) => {
     try {
-        const etf = await db["etf"].findOne({
+        let etf = await db["etf"].findOne({
             where: searchTerm,
         });
-        return etf || null;
+        if (etf) {
+            return {
+                id: etf.dataValues.id,
+                name: etf.dataValues.name,
+                urlDatasheet: etf.dataValues.urlDatasheet,
+                isin: etf.dataValues.isin,
+                active: etf.dataValues.active,
+                update: etf.dataValues.update,
+                failed: etf.dataValues.failed,
+                etfIndexId: etf.dataValues.etfIndexId,
+                etfProviderId: etf.dataValues.etfProviderId,
+                sectorId: etf.dataValues.sectorId,
+            };
+        }
     } catch (err) {
         return err;
     }

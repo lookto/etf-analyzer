@@ -3,7 +3,7 @@
 "use strict";
 const inquirer = require("inquirer");
 const { getAllEtfProviders } = require("../services/etfProviderService");
-const { updateConfigs } = require("../services/countryConfigService");
+const { updateCountryConfigs } = require("../services/countryConfigService");
 const { updateSectorConfigs } = require("../services/sectorConfigService");
 
 const taskInquirer = () => {
@@ -92,16 +92,6 @@ const updateSectorConfigInquirer = async () => {
             });
             updateSectorConfigs(etfProvider.id);
         });
-};
-
-const updateCountryConfigs = async (etfProviderId) => {
-    if (!etfProviderId) return;
-
-    const numCreatedRecs = await updateConfigs(etfProviderId);
-    console.log(
-        numCreatedRecs,
-        "new country configs where succesfully created."
-    );
 };
 
 taskInquirer();

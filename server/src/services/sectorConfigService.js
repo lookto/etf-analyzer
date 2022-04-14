@@ -1,37 +1,44 @@
 const db = require("../models");
-
 const path = require("path");
 const { getAllEtfs } = require("./etfService");
-const { downloadFile, deleteFile } = require("./downloadService");
-const { loadSpreadsheetToJson } = require("./spreadsheetService");
-const { getSpreadsheetConfigByEtf } = require("./spreadsheetConfigService");
+const {
+    downloadFile,
+    deleteFile,
+    parseSpreadsheetToJson,
+} = require("./downloadService");
+const { getSpreadsheetConfig } = require("./spreadsheetConfigService");
+const { Op } = require("sequelize");
 
-const getSectorConfigByEtf = async ({ etfProviderId }) => {
-    if (!etfProviderId) return;
+const attachSectorConfigToDataObject = async (data) => {
+    if (!data) return;
 
-    const sectorConfigs = await getAllSectorConfigs({ etfProviderId });
-    if (sectorConfigs) {
-        const mappedSectorConfig = sectorConfigs.map(({ sectorId, name }) => ({
-            sectorId,
-            name,
-            etfProviderId,
-        }));
-        return mappedSectorConfig;
-    }
+    try {
+        const sectorConfigs = await getAllSectorConfigs({
+            etfProviderId: data.etf.etfProviderId,
+            sectorId: {
+                [Op.not]: null,
+            },
+        });
+        if (sectorConfigs) {
+            data.sectorConfig = [];
+            for (const config of sectorConfigs) {
+                data.sectorConfig.push({
+                    sector: config.name.trim(),
+                    sectorId: config.sectorId,
+                });
+            }
+        }
+    } catch (error) {}
 };
 
 const getAllSectorConfigs = async (searchTerm) => {
     if (!searchTerm) return;
-
     try {
         const sectorConfigs = await db["sectorConfig"].findAll({
             where: searchTerm,
         });
         return sectorConfigs;
-    } catch (err) {
-        console.log(err);
-        return null;
-    }
+    } catch (err) {}
 };
 
 const getSectorConfig = async (searchTerm) => {
@@ -41,11 +48,8 @@ const getSectorConfig = async (searchTerm) => {
         const sectorConfigs = await db["sectorConfig"].findOne({
             where: searchTerm,
         });
-        return sectorConfigs;
-    } catch (err) {
-        console.log(err);
-        return null;
-    }
+        return sectorConfigs || null;
+    } catch (err) {}
 };
 
 const createSectorConfig = async (rec) => {
@@ -54,10 +58,7 @@ const createSectorConfig = async (rec) => {
     try {
         await db["sectorConfig"].create(rec);
         return true;
-    } catch (err) {
-        console.log(err);
-        return false;
-    }
+    } catch (err) {}
 };
 
 const mapDataToSectorId = async (sector, sectorconfig) => {
@@ -73,77 +74,75 @@ const mapDataToSectorId = async (sector, sectorconfig) => {
 const updateSectorConfigs = async (etfProviderId) => {
     if (!etfProviderId) return;
 
-    const dir = path.join(__dirname, "../temp/");
-    const { firstDataLine, sectorColumn, isinColumn } =
-        await getSpreadsheetConfigByEtf({
+    try {
+        const dir = path.join(__dirname, "../temp/");
+        console.log(dir);
+        const { firstDataLine, sectorColumn } = await getSpreadsheetConfig({
             etfProviderId,
         });
 
-    const etfs = await getAllEtfs({ etfProviderId, sectorId: null });
-
-    let sectorsInEtfs = [];
-    for (const etf of etfs) {
-        const filePath = await downloadFile(etf.urlDatasheet, etf.isin, dir);
-
-        const parsedData = loadSpreadsheetToJson(filePath);
-        deleteFile(filePath);
-
-        const filteredData = parsedData.filter((data, index) => {
-            return index >= firstDataLine;
+        const etfs = await getAllEtfs({
+            etfProviderId,
+            sectorId: {
+                [Op.is]: null,
+            },
         });
 
-        for (const rec of filteredData) {
-            if (
-                !sectorsInEtfs.find((element) => {
-                    return element.sector === rec[sectorColumn];
-                }) &&
-                rec[sectorColumn].length > 1
-            ) {
-                sectorsInEtfs.push({
-                    etf: etf.isin,
-                    sector: rec[sectorColumn],
-                });
+        let sectorsInEtfs = [];
+        for (const etf of etfs) {
+            console.log(`${etf.name}`);
+            const dl = await downloadFile(etf.urlDatasheet, etf.isin, dir);
+
+            const jsonData = parseSpreadsheetToJson(dl);
+            deleteFile(dl);
+
+            const filteredData = jsonData.filter((data, index) => {
+                return index >= firstDataLine;
+            });
+
+            for (const rec of filteredData) {
+                if (
+                    !sectorsInEtfs.find((element) => {
+                        return element.sector === rec[sectorColumn];
+                    }) &&
+                    rec[sectorColumn].length > 1
+                ) {
+                    sectorsInEtfs.push({
+                        etf: etf.isin,
+                        sector: rec[sectorColumn],
+                    });
+                }
             }
         }
-    }
-    sectorsInEtfs = sectorsInEtfs.sort((a, b) => {
-        if (a.sector < b.sector) {
-            return -1;
-        }
-        if (a.sector > b.sector) {
+        sectorsInEtfs = sectorsInEtfs.sort((a, b) => {
+            if (a.sector < b.sector) {
+                return -1;
+            }
             return 1;
-        }
-    });
-    let newSectors = [];
-    let newRecCount = 0;
-    for (const sector of sectorsInEtfs) {
-        const sectorConfig = await getSectorConfig({
-            etfProviderId,
-            name: sector.sector,
         });
+        console.log(sectorsInEtfs);
+        let newRecCount = 0;
+        for (const sector of sectorsInEtfs) {
+            const sectorConfig = await getSectorConfig({
+                etfProviderId,
+                name: sector.sector,
+            });
 
-        if (!sectorConfig) {
-            newSectors.push(sector);
-            await createSectorConfig({ name: sector.sector, etfProviderId });
-            newRecCount++;
+            if (!sectorConfig) {
+                await createSectorConfig({
+                    name: `${sector.sector} (${sector.etf})`,
+                    etfProviderId,
+                });
+                newRecCount++;
+            }
         }
-    }
-    newSectors = newSectors.sort((a, b) => {
-        if (a.etf < b.etf) {
-            return -1;
-        }
-        if (a.etf > b.etf) {
-            return 1;
-        }
-    });
-    newSectors.forEach((element) => {
-        console.log(element);
-    });
-    return newRecCount;
+        return newRecCount;
+    } catch (error) {}
 };
 
 module.exports = {
-    getSectorConfigByEtf,
+    attachSectorConfigToDataObject,
+    createSectorConfig,
     mapDataToSectorId,
     updateSectorConfigs,
 };

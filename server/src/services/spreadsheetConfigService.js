@@ -1,25 +1,28 @@
 const db = require("../models");
 
-const getSpreadsheetConfigByEtf = async ({ etfProviderId }) => {
-    if (!etfProviderId) return;
+const attachSpreadsheetConfigToDataObject = async (data) => {
+    if (!data.etf) return;
 
-    const spreadsheetConfig = await getSpreadsheetConfig({ etfProviderId });
+    try {
+        const spreadsheetConfig = await getSpreadsheetConfig({
+            etfProviderId: data.etf.etfProviderId,
+        });
 
-    if (spreadsheetConfig) {
-        const mappedspreadsheetConfig = {
-            etfProviderId: spreadsheetConfig.etfProviderId,
-            firstDataLine: spreadsheetConfig.firstDataLine,
-            isinColumn: spreadsheetConfig.isinColumn,
-            countryColumn: spreadsheetConfig.countryColumn,
-            sectorColumn: spreadsheetConfig.sectorColumn,
-            recalculateWeight: spreadsheetConfig.recalculateWeight,
-            convertWeightToDecimal: spreadsheetConfig.convertWeightToDecimal,
-            weightColumn: spreadsheetConfig.weightColumn,
-        };
-        return mappedspreadsheetConfig;
+        if (spreadsheetConfig) {
+            data.spreadsheetConfig = {
+                firstDataLine: spreadsheetConfig.firstDataLine,
+                isinColumn: spreadsheetConfig.isinColumn,
+                countryColumn: spreadsheetConfig.countryColumn,
+                sectorColumn: spreadsheetConfig.sectorColumn,
+                recalculateWeight: spreadsheetConfig.recalculateWeight,
+                convertWeightToDecimal:
+                    spreadsheetConfig.convertWeightToDecimal,
+                weightColumn: spreadsheetConfig.weightColumn,
+            };
+        }
+    } catch (error) {
+        console.log(error);
     }
-
-    return null;
 };
 
 const getSpreadsheetConfig = async (searchTerm) => {
@@ -36,4 +39,4 @@ const getSpreadsheetConfig = async (searchTerm) => {
     }
 };
 
-module.exports = { getSpreadsheetConfigByEtf };
+module.exports = { attachSpreadsheetConfigToDataObject, getSpreadsheetConfig };
