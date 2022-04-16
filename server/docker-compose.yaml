@@ -1,0 +1,28 @@
+version: "3"
+
+services:
+    db:
+        image: mysql:5.7.37
+        container_name: mysql-db
+        restart: unless-stopped
+        environment:
+            MYSQL_ROOT_PASSWORD: test123
+            MYSQL_DATABASE: etfportfolioanalyzer
+            MYSQL_USER: etftest
+            MYSQL_PASSWORD: test123
+        ports:
+            - "3306:3306"
+        volumes:
+            - dbdata:/var/lib/mysql
+    crawler:
+        image: europe-west3-docker.pkg.dev/daily-business-347013/private-projects-repo/etfanalyzer:1.0
+        container_name: etfdatacrawler
+        restart: unless-stopped
+        environment:
+            NODE_ENV: production
+            DB_USERNAME: etftest
+            DB_PASSWORD: test123
+            DB_DATABASE: etfportfolioanalyzer
+            DB_HOST: mysql-db
+volumes:
+    dbdata:
