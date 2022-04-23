@@ -1,0 +1,37 @@
+{
+    "name": "etf-anaylzer-api",
+    "version": "1.0.0",
+    "description": "The api for my etf analyzer, a tool/webapp to analyze your (future) etf portfolio regarding diversity.",
+    "main": "index.js",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "type": "module",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/lookto/etf-analyzer.git"
+    },
+    "keywords": [
+        "etf",
+        "analyzer",
+        "portfolio",
+        "analyzer",
+        "api",
+        "express",
+        "REST"
+    ],
+    "author": "Lukas Tüllmann",
+    "bugs": {
+        "url": "https://github.com/lookto/etf-analyzer/issues"
+    },
+    "homepage": "https://github.com/lookto/etf-analyzer#readme",
+    "dependencies": {
+        "express": "^4.17.3",
+        "mysql2": "^2.3.3",
+        "sequelize": "^6.19.0"
+    },
+    "devDependencies": {
+        "nodemon": "^2.0.15",
+        "sequelize-cli": "^6.4.1"
+    }
+}
