@@ -1,9 +1,9 @@
-import express from "express";
+const express = require("express");
 
-import { getAllEtfs } from "../controllers/etf";
+const { getAllEtfs } = require("../controllers/etf");
 
-const router = express.Router();
+const etfRouter = express.Router();
 
-router.get("/", getAllEtfs);
+etfRouter.get("/", getAllEtfs);
 
-export default router;
+module.exports = etfRouter;

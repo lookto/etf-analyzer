@@ -1,6 +1,6 @@
-import db from "./models";
+const db = require("../models/");
 
-export const getAllEtfs = async (req, res) => {
+const getAllEtfs = async (req, res) => {
     try {
         const etfs = await db["etf"].findAll({
             where: { active: true },
@@ -17,3 +17,5 @@ export const getAllEtfs = async (req, res) => {
         return error;
     }
 };
+
+module.exports = { getAllEtfs };

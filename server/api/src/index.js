@@ -1,6 +1,6 @@
-import express from "express";
+const express = require("express");
 
-import etfRoutes from "./routes/etf";
+const etfRoutes = require("./routes/etf.js");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
