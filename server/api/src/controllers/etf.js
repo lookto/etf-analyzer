@@ -5,17 +5,36 @@ const getAllEtfs = async (req, res) => {
         const etfs = await db["etf"].findAll({
             where: { active: true },
         });
-        const mappedEtfs = etfs.map((etf) => ({
-            id: etf.dataValues.id,
-            name: etf.dataValues.name,
-            isin: etf.dataValues.isin,
-            providerId: etf.dataValues.etfProviderId,
-            indexId: etf.dataValues.etfIndexId,
-        }));
-        res.send(mappedEtfs);
+        res.send(mapData(etfs));
     } catch (error) {
         return error;
     }
 };
 
-module.exports = { getAllEtfs };
+const getAllEtfsByProviderId = async (req, res) => {
+    try {
+        const etfs = await db["etf"].findAll({
+            where: {
+                active: true,
+                etfProviderId: req.params.id,
+            },
+        });
+        res.send(mapData(etfs));
+    } catch (error) {
+        return error;
+    }
+};
+
+const mapData = (data) => {
+    const mappedData = data.map((etf) => ({
+        id: etf.dataValues.id,
+        name: etf.dataValues.name,
+        isin: etf.dataValues.isin,
+        providerId: etf.dataValues.etfProviderId,
+        indexId: etf.dataValues.etfIndexId,
+    }));
+
+    return mappedData;
+};
+
+module.exports = { getAllEtfs, getAllEtfsByProviderId };
