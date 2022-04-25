@@ -47,11 +47,6 @@ Also this is my first time realy working with git and github (besides of cloning
 * ReactJS
 * Axios
 
-[^1]:
-  When i first googled ORMs for NodeJS, Sequelize seemed to be good. If I would start over I would propably lean towards Prisma.
-[^2]:
-  Mainly because I was already familiar with using it since its my daily bread and butter.
-
 # "Why didn't you use Typescript?"
 
 Because this project is a lot of "first times" and I felt like learning TypeScript on top of learning Javascript would have been to much. But there will propably be a time where i refactor this code to be typesafe.
@@ -81,3 +76,8 @@ Because this project is a lot of "first times" and I felt like learning TypeScri
 ### Added or Changed
 - Added the first version of the data crawler, supporting ETFs issued by Xtrackers (dws).
 - Added 206 Xtracker ETFs to be tracked.
+
+[^1]:
+  When i first googled ORMs for NodeJS, Sequelize seemed to be good. If I would start over I would propably lean towards Prisma.
+[^2]:
+  Mainly because I was already familiar with using it since its my daily bread and butter.
