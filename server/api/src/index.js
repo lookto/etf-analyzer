@@ -1,4 +1,5 @@
 const express = require("express");
+var cors = require("cors");
 
 const etfRouter = require("./routes/etf");
 const etfProviderRouter = require("./routes/etfProvider");
@@ -11,6 +12,7 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
+app.use(cors());
 app.use("/etf", etfRouter);
 app.use("/provider", etfProviderRouter);
 app.use("/index", etfIndexRouter);
