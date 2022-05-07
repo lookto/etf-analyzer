@@ -7,7 +7,7 @@ const getAllSectors = async (req, res) => {
             id: sector.dataValues.id,
             name: sector.dataValues.name,
         }));
-        res.send(mappedEtfIndexes);
+        res.send(mappedSectors);
     } catch (error) {
         return error;
     }

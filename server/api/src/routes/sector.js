@@ -4,6 +4,6 @@ const { getAllSectors } = require("../controllers/sector");
 
 const sectorRouter = express.Router();
 
-sectorRouter.get("/", getAllEtfIndexes);
+sectorRouter.get("/", getAllSectors);
 
 module.exports = sectorRouter;
