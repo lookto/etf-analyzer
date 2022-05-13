@@ -1,0 +1,28 @@
+button {
+    padding: 10px 15px 10px 15px;
+    background-color: transparent;
+    color: #fff;
+    border-radius: 10px;
+    border: 1px solid #fff;
+    cursor: pointer;
+    font-family: Arboria, sans-serif;
+}
+
+.button--wrapper {
+    position: relative;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    width: 100%;
+}
+
+button:hover {
+    color: #252429;
+}
+
+.button--wrapper img {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    height: 20px;
+}
