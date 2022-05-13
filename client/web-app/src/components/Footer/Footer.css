@@ -1,0 +1,40 @@
+.footer--wrapper {
+    min-height: 50px;
+    background-color: hsl(252, 7%, 90%);
+    margin-top: auto;
+    width: 100%;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    flex-grow: 0;
+    font-size: 12px;
+}
+
+.footer {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+}
+.footer p {
+    align-items: center;
+}
+
+.icon {
+    height: 20px;
+    margin-top: 2px;
+}
+
+.footer a {
+    margin-left: 5px;
+    color: #252429;
+}
+
+.footer a:visited {
+    color: #252429;
+}
+
+@media (min-width: 720px) {
+    .footer--wrapper {
+        font-size: 16px;
+    }
+}
