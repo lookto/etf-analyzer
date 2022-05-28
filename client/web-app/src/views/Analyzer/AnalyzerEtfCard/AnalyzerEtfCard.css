@@ -1,0 +1,93 @@
+.etf--card--wrapper {
+    background-color: #fff4f3;
+    flex-shrink: 0;
+    flex-direction: column;
+    align-items: center;
+    border-radius: 10px;
+    width: 100%;
+    position: relative;
+}
+
+.etf--card {
+    /* margin: 40px 10px 10px 10px; */
+    width: calc(100% - 20px);
+    margin-top: 10px;
+    margin-bottom: 5px;
+    display: grid;
+    gap: 5px;
+    grid-template-columns: 1;
+    align-items: center;
+}
+
+.etf--card--icon {
+    -webkit-user-select: none; /* Safari */
+    -moz-user-select: none; /* Firefox */
+    -ms-user-select: none; /* IE10+/Edge */
+    user-select: none; /* Standard */
+    top: 0;
+    left: 0;
+    position: absolute;
+    display: block;
+    font-size: 140px;
+    line-height: 140px;
+    font-weight: 700;
+    color: hsl(5, 96%, 95%);
+    z-index: 0;
+    transform: translate(10%, -10%) rotate(-15deg);
+}
+
+.etf--card--element {
+    z-index: 1;
+}
+
+.etf--card--element--label {
+    font-weight: 500;
+    margin-right: 10px;
+}
+
+.etf--card--wrapper button {
+    color: #252429;
+    font-size: 0.8em;
+    font-weight: 700;
+    flex-shrink: 0;
+    height: fit-content;
+    width: fit-content;
+    margin-bottom: 10px;
+    border-radius: 0;
+    border: 0px;
+    padding: 0 5px 0 5px;
+    border-bottom: 2px solid transparent;
+}
+
+.etf--card--wrapper button:hover {
+    border-bottom: 2px solid #fb4d3d;
+}
+
+.etf--card--weight--input {
+    font-family: Arboria, sans-serif;
+    font-size: 16px;
+    padding: 5px 4px 5px 10px;
+    border-radius: 4px;
+    box-shadow: none;
+    border: 1px solid hsl(0, 0%, 70%);
+    width: calc(100% - 14px);
+    text-align: right;
+}
+
+:disabled {
+    background-color: #eee;
+}
+
+@media (min-width: 720px) {
+    .etf--card {
+        width: calc(100% - 80px);
+        margin-top: 40px;
+        margin-bottom: 20px;
+        gap: 20px;
+        grid-template-columns: 1fr 7fr;
+    }
+
+    .etf--card--wrapper button {
+        margin-bottom: 20px;
+    }
+}

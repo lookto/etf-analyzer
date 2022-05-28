@@ -1,0 +1,94 @@
+.analyzer--info--wrapper {
+    background-color: #fee8e6;
+    border: 1px solid #feddda;
+}
+
+.analyzer--info {
+    margin: 20px 10px 20px 10px;
+}
+
+.analyzer--info h2 {
+    margin: 0 0 10px 0;
+}
+
+.analyzer--headers {
+    background-color: #fb4d3d;
+    align-items: center;
+    height: 75px;
+    font-size: 500;
+}
+
+.analyzer--headers h2 {
+    padding-left: 25px;
+    line-height: 80%;
+    color: #fff;
+}
+
+.analyzer--body--etfs {
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    height: auto;
+    color: #000;
+}
+
+.analyzer--body--etfs--button button {
+    color: #252429;
+    font-size: 13px;
+    font-weight: 500;
+    width: 100px;
+    height: 50px;
+    border: 2px solid hsl(252, 7%, 85%);
+    border-radius: 13px;
+    flex-shrink: 0;
+}
+
+.analyzer--body--etfs--button button:hover {
+    border-color: #fb4d3d;
+}
+
+.analyzer--diversification--menu {
+    justify-content: left;
+    margin-left: 10px;
+    align-items: baseline;
+}
+.analyzer--diversification--menu ul {
+    margin-left: 10px;
+    gap: 10px;
+    padding: 0;
+    flex-wrap: wrap;
+}
+
+.analyzer--diversification--menu li {
+    padding: 5px;
+    list-style: none;
+    font-weight: 500;
+    border-bottom: 2px solid #fff;
+    cursor: pointer;
+}
+
+.analyzer--diversification--menu li:hover {
+    border-bottom: 2px solid hsl(252, 7%, 85%);
+}
+
+.analyzer--diversification--menu .li--active {
+    border-bottom: 2px solid #fb4d3d;
+}
+
+.analyzer--diversification--chart {
+    height: 500px;
+    margin: auto;
+    margin-bottom: 50px;
+}
+
+@media (min-width: 720px) {
+    .analyzer--info {
+        margin: 30px 20px 30px 20px;
+    }
+    .analyzer--diversification--menu ul {
+        margin-left: 20px;
+    }
+    .analyzer--diversification--menu li {
+        padding: 5px 10px 5px 10px;
+    }
+}
