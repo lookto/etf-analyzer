@@ -7,6 +7,9 @@ module.exports = (sequelize, DataTypes) => {
                 allowNull: false,
                 unique: true,
             },
+            translation_de: {
+                type: DataTypes.STRING,
+            },
         },
         {
             freezeTableName: true,

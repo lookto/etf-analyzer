@@ -1,0 +1,41 @@
+body {
+    margin: auto;
+    padding: 0;
+    font-family: Arboria, sans-serif;
+    font-weight: 400;
+    font-style: normal;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    background-color: #fff;
+    color: #252429;
+    min-width: 320px;
+}
+
+.flex--container {
+    display: -ms-flexbox;
+    display: -webkit-box;
+    display: -webkit-flexbox;
+    display: -webkit-flex;
+    display: flex;
+}
+
+#app {
+    margin-left: auto;
+    margin-right: auto;
+    width: 100%;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    min-height: 100vh;
+}
+
+.content--container {
+    max-width: 1140px;
+    width: calc(100% - 10px);
+}
+
+@media (min-width: 720px) {
+    .content--container {
+        width: calc(100% - 50px);
+    }
+}
