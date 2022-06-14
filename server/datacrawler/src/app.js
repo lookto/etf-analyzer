@@ -5,9 +5,6 @@ const { crawlEtfData } = require("./services/crawlerService");
 const { setUpdateTrigger } = require("./services/etfService");
 
 const init = async () => {
-    //Open and sync db
-    await db.sequelize.sync();
-
     //Cron job for setting the update trigger on etfs every monday @2am
     cron.schedule("* 2 * * 1", () => {
         setUpdateTrigger();
