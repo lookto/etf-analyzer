@@ -19,6 +19,10 @@ module.exports = (sequelize, DataTypes) => {
                 type: DataTypes.STRING,
                 allowNull: false,
             },
+            market: {
+                type: DataTypes.STRING,
+                allowNull: false,
+            },
         },
         {
             freezeTableName: true,
