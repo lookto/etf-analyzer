@@ -101,16 +101,18 @@ const updateSectorConfigs = async (etfProviderId) => {
             });
 
             for (const rec of filteredData) {
-                if (
-                    !sectorsInEtfs.find((element) => {
-                        return element.sector === rec[sectorColumn];
-                    }) &&
-                    rec[sectorColumn].length > 1
-                ) {
-                    sectorsInEtfs.push({
-                        etf: etf.isin,
-                        sector: rec[sectorColumn],
-                    });
+                if (rec.length > 1) {
+                    if (
+                        !sectorsInEtfs.find((element) => {
+                            return element.sector === rec[sectorColumn];
+                        }) &&
+                        rec[sectorColumn].length > 1
+                    ) {
+                        sectorsInEtfs.push({
+                            etf: etf.isin,
+                            sector: rec[sectorColumn],
+                        });
+                    }
                 }
             }
         }
