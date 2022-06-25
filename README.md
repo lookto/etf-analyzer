@@ -1,9 +1,9 @@
 # etf-analyzer
 
 ## What is the etf-analyzer?
-ETF-Analyzer is a small web app for, like the name suggests, analyzing your (future) ETF portfolio.
+ETF-Analyzer is a small [webapp](https://www.etfanalyzer.de) for, like the name suggests, analyzing your (future) ETF portfolio.
 
-I developed this idea after wanting to visualize my ETF portfolio to see it's diversification across countries, markets and industries and not finding any lightweight free tools online to satisfy my needs. My first approach - doing it in a spreadsheet, manualy importing every single ETF datapoint by hand - was not the best solution, so I started building this as my first JS project ever!
+I developed this idea after wanting to visualize my ETF portfolio to see it's diversification across countries, markets and industries, and not finding any lightweight free tools online to satisfy my needs. My first approach - doing it in a spreadsheet, manualy importing every single ETF datapoint by hand - was not the best solution, so I started building this as my first JS project ever!
 
 ## Disclaimer
 This is my first fullstack project and also my first project using 
@@ -25,6 +25,7 @@ Also this is my first time realy working with git and github (besides of cloning
   - [DataCrawler](#datacrawler)
   - [REST-Api](#rest-api)
   - [WebApp](#webapp)
+- [Changelog](#changelog)
 
 # Features
 
@@ -54,7 +55,7 @@ Because this project is a lot of "first times" and I felt like learning TypeScri
 # Packages
 ## DataCrawler
 - Weekly crawling all monitored ETFs by getting the spreadsheets, mapping the data and calculating totals for countries and sectors.
-- Supported ETF providers:
+- Supported ETF providers (will be adding more over time):
   - Xtrackers (dws)
 ## REST-Api
 - Provides the calculated etf data to the web app.
@@ -66,10 +67,15 @@ Because this project is a lot of "first times" and I felt like learning TypeScri
 - **GET** /index
 - **GET** /etfdata/:id
 ## WebApp
-
--- in production --
+- Provides a GUI that you can use to input your ETF portfolio
+and recieve an interactive doughnut chart to analyze the diversification.
 
 # Changelog
+
+## v0.2-alpha
+
+### Added or Changed
+- Added [webapp](https://www.etfanalyzer.de)
 
 ## v0.1-alpha
 
