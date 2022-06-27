@@ -7,6 +7,7 @@ const {
     parseSpreadsheetToJson,
 } = require("./downloadService");
 const { getSpreadsheetConfig } = require("./spreadsheetConfigService");
+const { getArrIndByStrg } = require("./helperService");
 const { Op } = require("sequelize");
 
 const attachSectorConfigToDataObject = async (data) => {
@@ -76,9 +77,10 @@ const updateSectorConfigs = async (etfProviderId) => {
 
     try {
         const dir = path.join(__dirname, "../temp/");
-        const { firstDataLine, sectorColumn } = await getSpreadsheetConfig({
-            etfProviderId,
-        });
+        const { firstDataLine, sectorColumn, sectorColumnName } =
+            await getSpreadsheetConfig({
+                etfProviderId,
+            });
 
         const etfs = await getAllEtfs({
             etfProviderId,
@@ -91,24 +93,31 @@ const updateSectorConfigs = async (etfProviderId) => {
         for (const etf of etfs) {
             console.log(`${etf.name}`);
             const dl = await downloadFile(etf.urlDatasheet, etf.isin, dir);
-
             const jsonData = parseSpreadsheetToJson(dl);
             deleteFile(dl);
 
+            let sectorColumnId = getArrIndByStrg(
+                jsonData[firstDataLine - 1],
+                sectorColumnName
+            );
+
+            sectorColumnId =
+                sectorColumnId > -1 ? sectorColumnId : sectorColumn;
+
             const filteredData = jsonData.filter((data, index) => {
-                return index >= firstDataLine;
+                return data && index >= firstDataLine && data[sectorColumnId];
             });
 
             for (const rec of filteredData) {
                 if (
                     !sectorsInEtfs.find((element) => {
-                        return element.sector === rec[sectorColumn];
+                        return element.sector === rec[sectorColumnId];
                     }) &&
-                    rec[sectorColumn]?.length > 1
+                    rec[sectorColumnId]?.length > 1
                 ) {
                     sectorsInEtfs.push({
                         etf: etf.isin,
-                        sector: rec[sectorColumn],
+                        sector: rec[sectorColumnId],
                     });
                 }
             }
@@ -119,7 +128,6 @@ const updateSectorConfigs = async (etfProviderId) => {
             }
             return 1;
         });
-        console.log(sectorsInEtfs);
         let newRecCount = 0;
         for (const sector of sectorsInEtfs) {
             const sectorConfig = await getSectorConfig({

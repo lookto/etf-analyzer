@@ -22,6 +22,10 @@ module.exports = (sequelize, DataTypes) => {
                 type: DataTypes.INTEGER,
                 allowNull: false,
             },
+            sectorColumnName: {
+                type: DataTypes.STRING,
+                allowNull: true,
+            },
             recalculateWeight: {
                 type: DataTypes.BOOLEAN,
                 allowNull: false,
