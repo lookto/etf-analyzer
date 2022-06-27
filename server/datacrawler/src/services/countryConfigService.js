@@ -77,18 +77,16 @@ const updateCountryConfigs = async (etfProviderId) => {
             });
 
             for (const rec of filteredData) {
-                if (rec.length > 1) {
-                    if (
-                        !countriesInEtfs.find((element) => {
-                            return element.country === rec[countryColumn];
-                        }) &&
-                        rec[countryColumn].length > 1
-                    ) {
-                        countriesInEtfs.push({
-                            etf: etf.isin,
-                            country: rec[countryColumn],
-                        });
-                    }
+                if (
+                    !countriesInEtfs.find((element) => {
+                        return element.country === rec[countryColumnId];
+                    }) &&
+                    rec[countryColumnId]?.length > 1
+                ) {
+                    countriesInEtfs.push({
+                        etf: etf.isin,
+                        country: rec[countryColumnId],
+                    });
                 }
             }
         }
@@ -105,7 +103,6 @@ const updateCountryConfigs = async (etfProviderId) => {
                 etfProviderId,
                 name: country.country,
             });
-
             if (!countryConfig) {
                 await createCountryConfig({
                     name: `${country.country} (${country.etf})`,
