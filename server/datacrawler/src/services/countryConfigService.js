@@ -7,6 +7,7 @@ const {
     parseSpreadsheetToJson,
 } = require("./downloadService");
 const { getSpreadsheetConfig } = require("./spreadsheetConfigService");
+const { getArrIndByStrg } = require("./helperService");
 const { Op } = require("sequelize");
 
 const getCountryConfig = async (searchTerm) => {
@@ -51,9 +52,10 @@ const updateCountryConfigs = async (etfProviderId) => {
 
     try {
         const dir = path.join(__dirname, "../temp/");
-        const { firstDataLine, countryColumn } = await getSpreadsheetConfig({
-            etfProviderId,
-        });
+        const { firstDataLine, countryColumn, countryColumnName } =
+            await getSpreadsheetConfig({
+                etfProviderId,
+            });
         const etfs = await getAllEtfs({ etfProviderId });
         let countriesInEtfs = [];
         for (const etf of etfs) {
@@ -62,8 +64,16 @@ const updateCountryConfigs = async (etfProviderId) => {
             const jsonData = parseSpreadsheetToJson(dl);
             deleteFile(dl);
 
-            const filteredData = jsonData.filter((data, index) => {
-                return index >= firstDataLine;
+            let countryColumnId = getArrIndByStrg(
+                jsonData[firstDataLine - 1],
+                countryColumnName
+            );
+
+            countryColumnId =
+                countryColumnId > -1 ? countryColumnId : countryColumn;
+
+            const filteredData = jsonData.slice((data, index) => {
+                return data && index >= firstDataLine && data[countryColumnId];
             });
 
             for (const rec of filteredData) {

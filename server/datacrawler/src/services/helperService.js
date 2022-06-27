@@ -17,4 +17,12 @@ const calculateTotalWeight = (data, key) => {
     return totalWeight;
 };
 
-module.exports = { isDecimal, calculateTotalWeight };
+const getArrIndByStrg = (array, string) => {
+    if (!array || !string) return -1;
+
+    return array.findIndex((element) => {
+        return element === string;
+    });
+};
+
+module.exports = { isDecimal, calculateTotalWeight, getArrIndByStrg };
