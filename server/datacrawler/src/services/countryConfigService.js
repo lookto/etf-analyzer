@@ -72,7 +72,7 @@ const updateCountryConfigs = async (etfProviderId) => {
             countryColumnId =
                 countryColumnId > -1 ? countryColumnId : countryColumn;
 
-            const filteredData = jsonData.slice((data, index) => {
+            const filteredData = jsonData.filter((data, index) => {
                 return data && index >= firstDataLine && data[countryColumnId];
             });
 
