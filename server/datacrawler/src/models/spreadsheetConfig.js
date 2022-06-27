@@ -14,9 +14,17 @@ module.exports = (sequelize, DataTypes) => {
                 type: DataTypes.INTEGER,
                 allowNull: true,
             },
+            countryColumnName: {
+                type: DataTypes.STRING,
+                allowNull: true,
+            },
             sectorColumn: {
                 type: DataTypes.INTEGER,
                 allowNull: false,
+            },
+            sectorColumnName: {
+                type: DataTypes.STRING,
+                allowNull: true,
             },
             recalculateWeight: {
                 type: DataTypes.BOOLEAN,

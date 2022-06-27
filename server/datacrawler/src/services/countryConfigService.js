@@ -7,6 +7,7 @@ const {
     parseSpreadsheetToJson,
 } = require("./downloadService");
 const { getSpreadsheetConfig } = require("./spreadsheetConfigService");
+const { getArrIndByStrg } = require("./helperService");
 const { Op } = require("sequelize");
 
 const getCountryConfig = async (searchTerm) => {
@@ -51,9 +52,10 @@ const updateCountryConfigs = async (etfProviderId) => {
 
     try {
         const dir = path.join(__dirname, "../temp/");
-        const { firstDataLine, countryColumn } = await getSpreadsheetConfig({
-            etfProviderId,
-        });
+        const { firstDataLine, countryColumn, countryColumnName } =
+            await getSpreadsheetConfig({
+                etfProviderId,
+            });
         const etfs = await getAllEtfs({ etfProviderId });
         let countriesInEtfs = [];
         for (const etf of etfs) {
@@ -62,23 +64,29 @@ const updateCountryConfigs = async (etfProviderId) => {
             const jsonData = parseSpreadsheetToJson(dl);
             deleteFile(dl);
 
+            let countryColumnId = getArrIndByStrg(
+                jsonData[firstDataLine - 1],
+                countryColumnName
+            );
+
+            countryColumnId =
+                countryColumnId > -1 ? countryColumnId : countryColumn;
+
             const filteredData = jsonData.filter((data, index) => {
-                return index >= firstDataLine;
+                return data && index >= firstDataLine && data[countryColumnId];
             });
 
             for (const rec of filteredData) {
-                if (rec.length > 1) {
-                    if (
-                        !countriesInEtfs.find((element) => {
-                            return element.country === rec[countryColumn];
-                        }) &&
-                        rec[countryColumn].length > 1
-                    ) {
-                        countriesInEtfs.push({
-                            etf: etf.isin,
-                            country: rec[countryColumn],
-                        });
-                    }
+                if (
+                    !countriesInEtfs.find((element) => {
+                        return element.country === rec[countryColumnId];
+                    }) &&
+                    rec[countryColumnId]?.length > 1
+                ) {
+                    countriesInEtfs.push({
+                        etf: etf.isin,
+                        country: rec[countryColumnId],
+                    });
                 }
             }
         }
@@ -95,7 +103,6 @@ const updateCountryConfigs = async (etfProviderId) => {
                 etfProviderId,
                 name: country.country,
             });
-
             if (!countryConfig) {
                 await createCountryConfig({
                     name: `${country.country} (${country.etf})`,
