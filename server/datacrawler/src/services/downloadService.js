@@ -2,7 +2,11 @@ const Downloader = require("nodejs-file-downloader");
 const path = require("path");
 const fs = require("fs");
 const xlsx = require("xlsx");
-const { isDecimal, calculateTotalWeight } = require("./helperService");
+const {
+    isDecimal,
+    calculateTotalWeight,
+    getArrIndByStrg,
+} = require("./helperService");
 
 const DIR_TEMP = path.join(__dirname, "../temp/");
 
@@ -13,19 +17,50 @@ const loadSpreadsheetToDataObject = async (data) => {
 
         const jsonData = parseSpreadsheetToJson(dl);
 
+        let weightColumnId = getArrIndByStrg(
+            jsonData[data.spreadsheetConfig.firstDataLine - 1],
+            data.spreadsheetConfig.weightColumnName
+        );
+
+        weightColumnId =
+            weightColumnId > -1
+                ? weightColumnId
+                : data.spreadsheetConfig.weightColumn;
+
+        let countryColumnId = getArrIndByStrg(
+            jsonData[data.spreadsheetConfig.firstDataLine - 1],
+            data.spreadsheetConfig.countryColumnName
+        );
+
+        countryColumnId =
+            countryColumnId > -1
+                ? countryColumnId
+                : data.spreadsheetConfig.countryColumn;
+
+        let sectorColumnId = getArrIndByStrg(
+            jsonData[data.spreadsheetConfig.firstDataLine - 1],
+            data.spreadsheetConfig.sectorColumnName
+        );
+
+        sectorColumnId =
+            sectorColumnId > -1
+                ? sectorColumnId
+                : data.spreadsheetConfig.sectorColumn;
+
         //filter headerlines
         filteredJsonData = jsonData.filter((line, index) => {
             return (
+                line &&
                 index >= data.spreadsheetConfig.firstDataLine &&
-                line[data.spreadsheetConfig.weightColumn]
+                line[weightColumnId]
             );
         });
 
         //convert weights to decimal if needed
         if (data.spreadsheetConfig.convertWeightToDecimal) {
             for (let line of filteredJsonData) {
-                line[data.spreadsheetConfig.weightColumn] = parseFloat(
-                    line[data.spreadsheetConfig.weightColumn]
+                line[weightColumnId] = parseFloat(
+                    line[weightColumnId]
                         .replaceAll(".", "")
                         .replaceAll(",", ".")
                 );
@@ -36,11 +71,10 @@ const loadSpreadsheetToDataObject = async (data) => {
         if (data.spreadsheetConfig.recalculateWeight) {
             const totalWeight = calculateTotalWeight(
                 filteredJsonData,
-                data.spreadsheetConfig.weightColumn
+                weightColumnId
             );
             for (let line of filteredJsonData) {
-                line[data.spreadsheetConfig.weightColumn] =
-                    line[data.spreadsheetConfig.weightColumn] / totalWeight;
+                line[weightColumnId] = line[weightColumnId] / totalWeight;
             }
         }
 
@@ -52,9 +86,9 @@ const loadSpreadsheetToDataObject = async (data) => {
                 line[data.spreadsheetConfig.weightColumn] > 0
             ) {
                 data.rawData.push({
-                    weight: line[data.spreadsheetConfig.weightColumn],
-                    country: line[data.spreadsheetConfig.countryColumn],
-                    sector: line[data.spreadsheetConfig.sectorColumn],
+                    weight: line[weightColumnId],
+                    country: line[countryColumnId],
+                    sector: line[sectorColumnId],
                 });
             }
         }

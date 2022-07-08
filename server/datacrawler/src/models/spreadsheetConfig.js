@@ -38,6 +38,10 @@ module.exports = (sequelize, DataTypes) => {
                 type: DataTypes.INTEGER,
                 allowNull: false,
             },
+            weightColumnName: {
+                type: DataTypes.STRING,
+                allowNull: true,
+            },
         },
         {
             freezeTableName: true,
