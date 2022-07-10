@@ -52,7 +52,8 @@ const loadSpreadsheetToDataObject = async (data) => {
             return (
                 line &&
                 index >= data.spreadsheetConfig.firstDataLine &&
-                line[weightColumnId]
+                line[weightColumnId] &&
+                line[sectorColumnId] !== data.spreadsheetConfig.sectorColumnName
             );
         });
 
