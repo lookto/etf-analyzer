@@ -67,7 +67,7 @@ export default function AnalyzerPage(props) {
     }
 
     function selectEtf(id, option) {
-        axios.get(`/api/etfdata/${option.value}`).then((res) => {
+        axios.get(`/api/etfdata/${option.id}`).then((res) => {
             setSelectedEtfs((prevSelectedEtfs) => {
                 const index = prevSelectedEtfs.findIndex(
                     (etf) => etf.id === id
@@ -270,13 +270,15 @@ export default function AnalyzerPage(props) {
     useEffect(() => {
         axios.get("/api/etf").then(
             (res) =>
-                (allEtfs.current = res.data.map((data) => ({
-                    value: data.id,
-                    label: data.name,
-                    isin: data.isin,
-                    providerId: data.providerId,
-                    inUse: false,
-                })))
+                (allEtfs.current = res.data
+                    .sort((a, b) => a.name.toLowerCase() > b.name.toLowerCase())
+                    .map((data) => ({
+                        value: data.isin,
+                        label: data.name,
+                        id: data.id,
+                        providerId: data.providerId,
+                        inUse: false,
+                    })))
         );
 
         axios
