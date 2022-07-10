@@ -13,11 +13,14 @@ const attachSpreadsheetConfigToDataObject = async (data) => {
                 firstDataLine: spreadsheetConfig.firstDataLine,
                 isinColumn: spreadsheetConfig.isinColumn,
                 countryColumn: spreadsheetConfig.countryColumn,
+                countryColumnName: spreadsheetConfig.countryColumnName,
                 sectorColumn: spreadsheetConfig.sectorColumn,
+                sectorColumnName: spreadsheetConfig.sectorColumnName,
                 recalculateWeight: spreadsheetConfig.recalculateWeight,
                 convertWeightToDecimal:
                     spreadsheetConfig.convertWeightToDecimal,
                 weightColumn: spreadsheetConfig.weightColumn,
+                weightColumnName: spreadsheetConfig.weightColumnName,
             };
         }
     } catch (error) {
