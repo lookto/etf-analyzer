@@ -8,12 +8,10 @@ export const appRouter = router({
         text: z.string().nullish()
       })
     )
-    .query(({ input }) => {
-      return {
+    .query(({ input }) => ({
         greeting: `hello ${input?.text ?? 'world'}`,
         time: new Date()
-      }
-    })
+      }))
 })
 
 // export type definition of API
