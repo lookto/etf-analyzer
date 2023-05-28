@@ -1,0 +1,9 @@
+{
+  "extends": "@etf-analyzer/config-ts-nest",
+  "compilerOptions": {
+    "baseUrl": "./",
+    "rootDir": ".",
+    "outDir": "./dist"
+  },
+  "exclude": ["node_modules","dist"]
+}
