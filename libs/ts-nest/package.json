@@ -1,0 +1,15 @@
+{
+  "name": "@etf-analyzer/config-ts-nest",
+  "version": "1.0.0",
+  "main": "tsconfig.json",
+  "scripts": {
+    "preinstall": "npx only-allow pnpm"
+  },
+  "dependencies": {
+    "@etf-analyzer/config-ts": "workspace:^"
+  },
+  "peerDependencies": {
+    "@types/node": "^20.2.5",
+    "typescript": "^5.0.4"
+  }
+}

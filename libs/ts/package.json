@@ -1,0 +1,12 @@
+{
+  "name": "@etf-analyzer/config-ts",
+  "version": "1.0.0",
+  "main": "tsconfig.json",
+  "scripts": {
+    "preinstall": "npx only-allow pnpm"
+  },
+  "peerDependencies": {
+    "@types/node": "^20.2.5",
+    "typescript": "^5.0.4"
+  }
+}

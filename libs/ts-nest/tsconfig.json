@@ -1,0 +1,13 @@
+{
+  "extends": "@etf-analyzer/config-ts",
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "CommonJS",
+    "allowSyntheticDefaultImports": true,
+    "declaration": true,
+    "incremental": true,
+    "noImplicitAny": true,
+    "forceConsistentCasingInFileNames": true,
+    "noFallthroughCasesInSwitch": true,
+  },
+}

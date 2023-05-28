@@ -4,8 +4,19 @@
   "description": "",
   "scripts": {
     "preinstall": "npx only-allow pnpm",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "format": "prettier",
+    "format:check": "pnpm format --check --debug-check",
+    "format:fix": "pnpm format --write"
   },
   "keywords": [],
-  "author": ""
+  "author": "",
+  "devDependencies": {
+    "@etf-analyzer/config-eslint-ts": "workspace:^",
+    "@etf-analyzer/config-prettier": "workspace:^",
+    "@etf-analyzer/config-ts-nest": "workspace:^",
+    "@types/node": "^20.2.5",
+    "eslint": "^8.41.0",
+    "prettier": "^2.8.8",
+    "typescript": "^5.0.4"
+  }
 }
