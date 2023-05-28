@@ -16,7 +16,7 @@ module.exports = {
   },
   overrides: [
     {
-      files: ['./server/**/*.ts'],
+      files: ['.src/server/**/*.ts'],
       rules: {
         'no-console': [
           'error',
@@ -26,6 +26,23 @@ module.exports = {
         ],
       },
     },
+    {
+      files: ['./src/layouts/**/*.vue'],
+      rules: {
+        'vue/multi-word-component-names': [
+          'error',
+          {
+            ignores: ['default'],
+          },
+        ],
+      },
+    },
+    {
+      files: ['./src/pages/**/*.vue'],
+      rules: {
+        'vue/multi-word-component-names': 'off', 
+      }
+    }
   ],
   ignorePatterns: ['.eslintrc.js'],
 };
