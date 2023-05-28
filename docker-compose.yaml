@@ -1,0 +1,64 @@
+version: '3.8'
+
+x-version-variables: &version-variables
+  NODE_VERSION: '18.15.0'
+  PNPM_VERSION: '8.6.0'
+
+services:
+  nginx-proxy:
+    container_name: etfanalyzer-nginx-proxy
+    image: jwilder/nginx-proxy
+    ports:
+      - "80:80"
+    volumes:
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+    networks:
+      - etfanalyzer-frontend
+      - etfanalyzer-backend
+  importer:
+    container_name: etfanalyzer-importer
+    build:
+      dockerfile: Dockerfile.dev
+      args:
+        <<: *version-variables
+        APP_PATH: 'importer'
+        APP_NAME: '@etf-analyzer/importer'
+        PREBUILD: true
+        START_SCRIPT: 'start:debug'
+    volumes:
+      - ./apps/importer/src:/usr/src/app/apps/importer/src
+    expose:
+      - 3000
+    ports:
+      - "9229:9229" # Nodejs Debug port
+    environment:
+      VIRTUAL_HOST: 'importer.localhost'
+      VIRTUAL_PORT: 3000
+      NODE_ENV: 'development'
+    networks:
+      - etfanalyzer-backend
+  frontend:
+    container_name: etfanalyzer-frontend
+    build:
+      dockerfile: Dockerfile.dev
+      args:
+        <<: *version-variables
+        APP_PATH: 'frontend'
+        APP_NAME: '@etf-analyzer/frontend'
+        PNPM_INSTALL_OPTIONS: '--shamefully-hoist'
+        START_SCRIPT: 'dev'
+    volumes:
+      - ./apps/frontend/src:/usr/src/app/apps/frontend/src
+    environment:
+      VIRTUAL_HOST: 'localhost'
+      VIRTUAL_PORT: 3000
+      NODE_ENV: 'development'
+    networks:
+      - etfanalyzer-frontend
+      - etfanalyzer-backend
+  
+networks:
+  etfanalyzer-frontend:
+    driver: bridge
+  etfanalyzer-backend:
+    driver: bridge
