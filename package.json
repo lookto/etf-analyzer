@@ -4,9 +4,11 @@
   "description": "",
   "scripts": {
     "preinstall": "npx only-allow pnpm",
-    "format": "prettier",
-    "format:check": "pnpm format --check --debug-check",
-    "format:fix": "pnpm format --write"
+    "format": "prettier .",
+    "format:check": "prettier --check .",
+    "format:fix": "prettier --write .",
+    "lint": "eslint src/**/*.{ts,tsx,vue}",
+    "lint:fix": "pnpm lint --fix"
   },
   "keywords": [],
   "author": "",
@@ -14,6 +16,7 @@
     "@etf-analyzer/config-eslint-ts": "workspace:^",
     "@etf-analyzer/config-eslint-ts-nuxt": "workspace:^",
     "@etf-analyzer/config-prettier": "workspace:^",
+    "@etf-analyzer/config-ts": "workspace:^",
     "@etf-analyzer/config-ts-nest": "workspace:^",
     "@types/node": "^20.2.5",
     "eslint": "^8.41.0",

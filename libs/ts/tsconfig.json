@@ -11,5 +11,5 @@
     "sourceMap": true,
     "moduleResolution": "node",
     "removeComments": true
-  },
+  }
 }

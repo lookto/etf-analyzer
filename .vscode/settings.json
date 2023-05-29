@@ -15,11 +15,7 @@
   "[typescript]": {
     "editor.defaultFormatter": "rvest.vs-code-prettier-eslint"
   },
-  "eslint.validate": [
-    "javascript",
-    "typescript",
-    "vue"
-  ],
+  "eslint.validate": ["javascript", "typescript", "vue"],
   // Tailwind Support, see https://tailwindcss.nuxt.dev/tailwind/editor-support
   "tailwindCSS.experimental.configFile": "/apps/frontend/.nuxt/tailwind.config.cjs",
   "files.associations": {
@@ -27,8 +23,7 @@
   },
   // Auto-complete `.value` attribute when volar is installed
   "volar.autoCompleteRefs": true,
-  
+
   // Disable 'Unknown at rule @apply css(unknownAtRules)' with postcss language support plugin
   "css.lint.unknownAtRules": "ignore"
-
 }

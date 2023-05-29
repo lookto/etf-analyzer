@@ -41,9 +41,9 @@ module.exports = {
     {
       files: ['./src/pages/**/*.vue'],
       rules: {
-        'vue/multi-word-component-names': 'off', 
-      }
-    }
+        'vue/multi-word-component-names': 'off',
+      },
+    },
   ],
   ignorePatterns: ['.eslintrc.js'],
 };

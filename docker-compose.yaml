@@ -9,7 +9,7 @@ services:
     container_name: etfanalyzer-nginx-proxy
     image: jwilder/nginx-proxy
     ports:
-      - "80:80"
+      - '80:80'
     volumes:
       - /var/run/docker.sock:/tmp/docker.sock:ro
     networks:
@@ -30,7 +30,7 @@ services:
     expose:
       - 3000
     ports:
-      - "9229:9229" # Nodejs Debug port
+      - '9229:9229' # Nodejs Debug port
     environment:
       VIRTUAL_HOST: 'importer.localhost'
       VIRTUAL_PORT: 3000
@@ -56,7 +56,7 @@ services:
     networks:
       - etfanalyzer-frontend
       - etfanalyzer-backend
-  
+
 networks:
   etfanalyzer-frontend:
     driver: bridge
