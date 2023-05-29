@@ -263,3 +263,5 @@ volumes
 # sidebase
 .nitro
 .output
+
+libs/db/client

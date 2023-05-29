@@ -2,6 +2,9 @@
 module.exports = {
   root: true,
   parser: '@typescript-eslint/parser',
+  parserOptions: {
+    sourceType: 'module',
+  },
   plugins: ['@typescript-eslint', 'prettier'],
   extends: ['airbnb-base', 'airbnb-typescript/base', 'prettier'],
   env: {
@@ -11,5 +14,13 @@ module.exports = {
   ignorePatterns: ['.eslintrc.js'],
   rules: {
     '@typescript-eslint/interface-name-prefix': 'off',
+    'import/no-extraneous-dependencies': [
+      'error',
+      {
+        devDependencies: ['**/*.test.js', '**/*.spec.js'],
+        optionalDependencies: false,
+        packageDir: __dirname,
+      },
+    ],
   },
 };

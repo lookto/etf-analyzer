@@ -3,3 +3,6 @@ pnpm-lock.yaml
 
 build/
 dist/
+
+.prisma
+libs/db/client
